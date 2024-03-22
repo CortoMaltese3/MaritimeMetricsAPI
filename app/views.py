@@ -10,23 +10,34 @@ csv_path = app.config["CSV_PATH"]
 maritime_data = MaritimeData(csv_path)
 
 
-@app.route("/api/vessel_invalid_data/<int:vessel_code>", methods=["GET"])
+@app.route("/api/vessel_invalid_data/<vessel_code>", methods=["GET"])
 def get_vessel_invalid_data(vessel_code):
-    invalid_data = maritime_data.get_invalid_data_for_vessel(vessel_code)
+    try:
+        vessel_code_int = int(vessel_code)
+    except ValueError:
+        return (
+            jsonify(
+                {"message": "Invalid vessel code format.", "vessel_code": vessel_code}
+            ),
+            400,
+        )
+
+    invalid_data = maritime_data.get_invalid_data_for_vessel(vessel_code_int)
     if not invalid_data:
         return (
             jsonify(
                 {
                     "message": "No data found for this vessel.",
-                    "vessel_code": vessel_code,
+                    "vessel_code": vessel_code_int,
                 }
             ),
             404,
         )
+
     return jsonify(
         {
             "message": "Found invalid data for this vessel",
-            "vessel_code": vessel_code,
+            "vessel_code": vessel_code_int,
             "invalid_data": invalid_data,
         }
     )
