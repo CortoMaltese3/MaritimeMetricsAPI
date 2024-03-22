@@ -49,5 +49,41 @@ def get_vessel_invalid_data(vessel_code):
     )
 
 
+@app.route("/api/vessel_speed_difference/<vessel_code>", methods=["GET"])
+def get_vessel_speed_difference(vessel_code):
+    try:
+        vessel_code_int = int(vessel_code)
+    except ValueError:
+        return (
+            jsonify(
+                {"message": "Invalid vessel code format.", "vessel_code": vessel_code}
+            ),
+            400,
+        )
+
+    speed_differences = maritime_data.get_speed_differences_for_vessel(vessel_code_int)
+    if not speed_differences:
+        return (
+            jsonify(
+                {
+                    "message": "No data found for this vessel or no speed differences calculated.",
+                    "vessel_code": vessel_code_int,
+                }
+            ),
+            404,
+        )
+
+    return Response(
+        json.dumps(
+            {
+                "message": "Speed differences for the vessel",
+                "vessel_code": vessel_code_int,
+                "speed_differences": speed_differences,
+            }
+        ),
+        mimetype="application/json",
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)

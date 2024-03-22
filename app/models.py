@@ -67,7 +67,7 @@ class MaritimeData:
             if column in self.data.columns and self.data[column].dtype != "object":
                 z_scores = stats.zscore(self.data[column].dropna())
                 outlier_mask = (
-                    abs(z_scores) > 1
+                    abs(z_scores) > 2
                 )  # This can be adjusted depending on how strict we want to be. Leave it as 1 for now.
 
                 full_mask = pd.Series(False, index=self.data.index)
@@ -88,10 +88,15 @@ class MaritimeData:
     def _filter_by_condition(self, condition_func, problem_type, columns):
         for column in columns:
             mask = condition_func(self.data[column])
-            self.data.loc[mask, column] = pd.NA
-            invalid_rows = self.data[mask]
-            if not invalid_rows.empty:
-                summary = invalid_rows.groupby("vessel_code").size().to_dict()
+            valid_rows = self.data.loc[~mask]
+            filtered_rows = self.data.loc[mask]
+
+            # Update the main data with rows where the condition is not met.
+            # Add this approach to filter out the invalid rows instead of marking them as invalid
+            self.data = valid_rows
+
+            if not filtered_rows.empty:
+                summary = filtered_rows.groupby("vessel_code").size().to_dict()
                 for vessel_code, count in summary.items():
                     self.invalid_data.setdefault(vessel_code, {}).setdefault(
                         problem_type, {}
@@ -108,3 +113,16 @@ class MaritimeData:
                 )
                 sorted_summary[problem_type] = dict(sorted_columns)
             return sorted_summary
+
+    def get_speed_differences_for_vessel(self, vessel_code):
+        vessel_data = self.data[self.data["vessel_code"] == vessel_code].copy()
+        if vessel_data.empty:
+            return {}
+
+        vessel_data["speed_difference"] = abs(
+            vessel_data["actual_speed_overground"]
+            - vessel_data["proposed_speed_overground"]
+        )
+
+        speed_differences = vessel_data[["latitude", "longitude", "speed_difference"]]
+        return speed_differences.to_dict(orient="records")
