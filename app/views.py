@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
+import json
 
 from config import Config
 from .models import MaritimeData
@@ -34,12 +35,17 @@ def get_vessel_invalid_data(vessel_code):
             404,
         )
 
-    return jsonify(
-        {
-            "message": "Found invalid data for this vessel",
-            "vessel_code": vessel_code_int,
-            "invalid_data": invalid_data,
-        }
+    # Added this approach to avoid structure data issues with jsonify messing
+    # with the dictionary structure
+    return Response(
+        json.dumps(
+            {
+                "message": "Found invalid data for this vessel",
+                "vessel_code": vessel_code_int,
+                "invalid_data": invalid_data,
+            },
+        ),
+        mimetype="application/json",
     )
 
 
