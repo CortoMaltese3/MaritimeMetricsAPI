@@ -126,3 +126,45 @@ class MaritimeData:
 
         speed_differences = vessel_data[["latitude", "longitude", "speed_difference"]]
         return speed_differences.to_dict(orient="records")
+
+    def calculate_compliance_score(self, vessel_code):
+        vessel_data = self.data[self.data["vessel_code"] == vessel_code].copy()
+
+        # Avoid division by zero by filtering out proposed speeds that are exactly zero
+        vessel_data = vessel_data[vessel_data["proposed_speed_overground"] != 0]
+
+        if len(vessel_data) == 0:
+            return 0.0  # Return 0 compliance if there's no data to calculate on
+
+        # Calculate the percentage difference between actual and proposed speeds
+        vessel_data["percentage_difference"] = (
+            abs(
+                vessel_data["actual_speed_overground"]
+                - vessel_data["proposed_speed_overground"]
+            )
+            / vessel_data["proposed_speed_overground"]
+        ) * 100
+
+        # Calculate the average of these percentage differences and subtract from 100
+        compliance_score = 100 - vessel_data["percentage_difference"].mean()
+
+        # Return the score formatted to two decimal places
+        return round(compliance_score, 2)
+
+    def compare_vessel_compliance(self, vessel_code1, vessel_code2):
+        # Check if the vessel codes exist in the dataset
+        if vessel_code1 not in self.data["vessel_code"].values:
+            return f"Vessel code {vessel_code1} does not exist."
+
+        if vessel_code2 not in self.data["vessel_code"].values:
+            return f"Vessel code {vessel_code2} does not exist."
+
+        score1 = self.calculate_compliance_score(vessel_code1)
+        score2 = self.calculate_compliance_score(vessel_code2)
+
+        if score1 > score2:
+            return f"Vessel {vessel_code1} is more compliant with a compliance score of {score1}% compared to Vessel {vessel_code2}'s score of {score2}%."
+        elif score2 > score1:
+            return f"Vessel {vessel_code2} is more compliant with a compliance score of {score2}% compared to Vessel {vessel_code1}'s score of {score1}%."
+        else:
+            return f"Both vessels have the same compliance score of {score1}%."

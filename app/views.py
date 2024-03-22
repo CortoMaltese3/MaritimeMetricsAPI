@@ -85,5 +85,26 @@ def get_vessel_speed_difference(vessel_code):
     )
 
 
+@app.route(
+    "/api/vessel_compliance_comparison/<vessel_code1>/<vessel_code2>", methods=["GET"]
+)
+def vessel_compliance_comparison(vessel_code1, vessel_code2):
+    try:
+        vessel_code1_int = int(vessel_code1)
+        vessel_code2_int = int(vessel_code2)
+    except ValueError:
+        return jsonify({"message": "Invalid vessel code format."}), 400
+
+    comparison_result = maritime_data.compare_vessel_compliance(
+        vessel_code1_int, vessel_code2_int
+    )
+
+    # Check if the result is an error message indicating a non-existent vessel code
+    if "does not exist" in comparison_result:
+        return jsonify({"message": comparison_result}), 404
+
+    return jsonify({"message": comparison_result})
+
+
 if __name__ == "__main__":
     app.run(debug=True)
