@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  api:
+    container_name: marine-metrics-api
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    networks:
+      - marine-metrics-network
+
+networks:
+  marine-metrics-network:
+    name: marine-metrics-network
+    driver: bridge
