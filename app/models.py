@@ -27,6 +27,7 @@ class MaritimeData:
         self._filter_below_zero()
         self._filter_missing_values()
         self._filter_outliers()
+        self._filter_invalid_geocoordinates()
 
     def _filter_below_zero(self):
         condition = lambda col: col < 0
@@ -74,6 +75,15 @@ class MaritimeData:
                 full_mask.loc[non_na_indices] = outlier_mask.values  # Ensure alignment
 
                 self._filter_by_condition(lambda col: full_mask, "outlier", [column])
+
+    def _filter_invalid_geocoordinates(self):
+        latitude_condition = lambda col: (col < -90) | (col > 90)
+        longitude_condition = lambda col: (col < -180) | (col > 180)
+
+        self._filter_by_condition(latitude_condition, "invalid_latitude", ["latitude"])
+        self._filter_by_condition(
+            longitude_condition, "invalid_longitude", ["longitude"]
+        )
 
     def _filter_by_condition(self, condition_func, problem_type, columns):
         for column in columns:
