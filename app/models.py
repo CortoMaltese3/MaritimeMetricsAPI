@@ -1,4 +1,5 @@
 import pandas as pd
+from scipy import stats
 
 
 class MaritimeData:
@@ -22,8 +23,11 @@ class MaritimeData:
             return pd.DataFrame()
 
     def _filter_invalid_data(self):
-        # Specify columns to check for invalid data to avoid checking
-        # lat/long, vessel_code and timestamp columns
+        self._filter_below_zero()
+        self._filter_missing_values()
+
+    def _filter_below_zero(self):
+        condition = lambda col: col < 0
         columns = [
             "power",
             "fuel_consumption",
@@ -31,34 +35,35 @@ class MaritimeData:
             "proposed_speed_overground",
             "predicted_fuel_consumption",
         ]
+        self._filter_by_condition(condition, "below_zero", columns=columns)
 
-        self.invalid_data.clear()
-        valid_mask = pd.Series([True] * len(self.data))
+    def _filter_missing_values(self):
+        condition = lambda col: col.isna()
+        columns = [
+            "vessel_code",
+            "datetime",
+            "latitude",
+            "longitude",
+            "power",
+            "fuel_consumption",
+            "actual_speed_overground",
+            "proposed_speed_overground",
+            "predicted_fuel_consumption",
+        ]
+        self._filter_by_condition(condition, "missing_value", columns=columns)
 
+    def _filter_by_condition(self, condition_func, problem_type, columns):
         for column in columns:
-            # Conditions for invalid data
-            below_zero = self.data[column] < 0
-            missing_value = self.data[column].isna()
-
-            for condition, problem_type in [
-                (below_zero, "below_zero"),
-                (missing_value, "missing_value"),
-            ]:
-                # Update valid mask
-                valid_mask &= ~condition
-
-                # Aggregate invalid data by 'vessel_code'
-                invalid_rows = self.data[condition]
-                if not invalid_rows.empty:
-                    summary = invalid_rows.groupby("vessel_code").size().to_dict()
-                    for vessel_code, count in summary.items():
-                        self.invalid_data.setdefault(vessel_code, {}).setdefault(
-                            problem_type, {}
-                        ).setdefault(column, 0)
-                        self.invalid_data[vessel_code][problem_type][column] += count
-
-        # Filter out invalid data based on the updated valid mask
-        self.data = self.data[valid_mask]
+            mask = condition_func(self.data[column])
+            self.data.loc[mask, column] = pd.NA
+            invalid_rows = self.data[mask]
+            if not invalid_rows.empty:
+                summary = invalid_rows.groupby("vessel_code").size().to_dict()
+                for vessel_code, count in summary.items():
+                    self.invalid_data.setdefault(vessel_code, {}).setdefault(
+                        problem_type, {}
+                    ).setdefault(column, 0)
+                    self.invalid_data[vessel_code][problem_type][column] += count
 
     def get_invalid_data_for_vessel(self, vessel_code):
         if vessel_code in self.invalid_data:
