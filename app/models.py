@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from scipy import stats
 
@@ -6,7 +7,7 @@ class MaritimeData:
     def __init__(self, csv_path):
         self.csv_path = csv_path
         self.data = self._load_csv()
-        self.invalid_data = {}  # Store problems and their types
+        self.invalid_data = {}
         print(f"Original dataset size: {len(self.data)}")
         if not self.data.empty:
             self._filter_invalid_data()
@@ -25,6 +26,7 @@ class MaritimeData:
     def _filter_invalid_data(self):
         self._filter_below_zero()
         self._filter_missing_values()
+        self._filter_outliers()
 
     def _filter_below_zero(self):
         condition = lambda col: col < 0
@@ -51,6 +53,27 @@ class MaritimeData:
             "predicted_fuel_consumption",
         ]
         self._filter_by_condition(condition, "missing_value", columns=columns)
+
+    def _filter_outliers(self):
+        columns = [
+            "power",
+            "fuel_consumption",
+            "actual_speed_overground",
+            "proposed_speed_overground",
+            "predicted_fuel_consumption",
+        ]
+        for column in columns:
+            if column in self.data.columns and self.data[column].dtype != "object":
+                z_scores = stats.zscore(self.data[column].dropna())
+                outlier_mask = (
+                    abs(z_scores) > 1
+                )  # This can be adjusted depending on how strict we want to be. Leave it as 1 for now.
+
+                full_mask = pd.Series(False, index=self.data.index)
+                non_na_indices = self.data[column].dropna().index
+                full_mask.loc[non_na_indices] = outlier_mask.values  # Ensure alignment
+
+                self._filter_by_condition(lambda col: full_mask, "outlier", [column])
 
     def _filter_by_condition(self, condition_func, problem_type, columns):
         for column in columns:
