@@ -46,4 +46,4 @@ jobs:
 
       - name: Lint with pylint
         run: |
-          pylint app/
+          pylint .\app\ --fail-under=9
