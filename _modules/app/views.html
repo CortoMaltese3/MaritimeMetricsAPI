@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>app.views &mdash; MarineMetricsAPI v0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fa47ad08"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MarineMetricsAPI
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Models Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html#module-app.views">Views Module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MarineMetricsAPI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">app.views</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for app.views</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module containing Flask route definitions for the web application.</span>
+
+<span class="sd">This module defines the API endpoints of the web application, handling</span>
+<span class="sd">the requests to various functionalities such as retrieving invalid data for vessels,</span>
+<span class="sd">comparing vessel compliance scores, and fetching vessel speed differences. Each route</span>
+<span class="sd">is associated with a specific function that processes the request and returns a response</span>
+<span class="sd">to the client.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="kn">from</span> <span class="nn">config</span> <span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">MaritimeData</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">Config</span><span class="p">)</span>
+
+<span class="n">csv_path</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;CSV_PATH&quot;</span><span class="p">]</span>
+<span class="n">maritime_data</span> <span class="o">=</span> <span class="n">MaritimeData</span><span class="p">(</span><span class="n">csv_path</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_vessel_invalid_data">
+<a class="viewcode-back" href="../../api.html#app.views.get_vessel_invalid_data">[docs]</a>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/api/vessel_invalid_data/&lt;vessel_code&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_vessel_invalid_data</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves a summary of invalid data for a specific vessel based on its code.</span>
+
+<span class="sd">    :param vessel_code: The unique code identifying the vessel.</span>
+<span class="sd">    :return: A JSON response containing a summary of invalid data issues.</span>
+<span class="sd">    :rtype: Response</span>
+
+<span class="sd">    Example response::</span>
+
+<span class="sd">            {</span>
+<span class="sd">                &quot;message&quot;: &quot;Found invalid data for this vessel&quot;,</span>
+<span class="sd">                &quot;vessel_code&quot;: 3001,</span>
+<span class="sd">                &quot;invalid_data&quot;: {</span>
+<span class="sd">                    &quot;below_zero&quot;: {</span>
+<span class="sd">                        &quot;proposed_speed_overground&quot;: 30686,</span>
+<span class="sd">                        &quot;predicted_fuel_consumption&quot;: 1669,</span>
+<span class="sd">                        &quot;power&quot;: 1375</span>
+<span class="sd">                    }</span>
+<span class="sd">                    ...</span>
+<span class="sd">                }</span>
+<span class="sd">            }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">jsonify</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid vessel code format.&quot;</span><span class="p">,</span> <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code</span><span class="p">}</span>
+            <span class="p">),</span>
+            <span class="mi">400</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">invalid_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_invalid_data_for_vessel</span><span class="p">(</span><span class="n">vessel_code_int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">invalid_data</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">jsonify</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No data found for this vessel.&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+            <span class="mi">404</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Added this approach to avoid structure data issues with jsonify messing</span>
+    <span class="c1"># with the dictionary structure</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Found invalid data for this vessel&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
+                <span class="s2">&quot;invalid_data&quot;</span><span class="p">:</span> <span class="n">invalid_data</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">),</span>
+        <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_vessel_speed_difference">
+<a class="viewcode-back" href="../../api.html#app.views.get_vessel_speed_difference">[docs]</a>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/api/vessel_speed_difference/&lt;vessel_code&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_vessel_speed_difference</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides the speed differences between actual and proposed speeds for a vessel.</span>
+
+<span class="sd">    :param vessel_code: The unique code identifying the vessel.</span>
+<span class="sd">    :return: A JSON response containing the speed differences for the vessel.</span>
+<span class="sd">    :rtype: Response</span>
+
+<span class="sd">    Example response::</span>
+
+<span class="sd">            {</span>
+<span class="sd">                &quot;message&quot;: &quot;Speed differences for the vessel&quot;,</span>
+<span class="sd">                &quot;vessel_code&quot;: 19310,</span>
+<span class="sd">                &quot;speed_differences&quot;: [</span>
+<span class="sd">                    {</span>
+<span class="sd">                        &quot;latitude&quot;: 49.2837677001953,</span>
+<span class="sd">                        &quot;longitude&quot;: -123.177825927734,</span>
+<span class="sd">                        &quot;speed_difference&quot;: 0.747206647694111</span>
+<span class="sd">                    }</span>
+<span class="sd">                    ...</span>
+<span class="sd">                ]</span>
+<span class="sd">            }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">jsonify</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid vessel code format.&quot;</span><span class="p">,</span> <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code</span><span class="p">}</span>
+            <span class="p">),</span>
+            <span class="mi">400</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">speed_differences</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_speed_differences_for_vessel</span><span class="p">(</span><span class="n">vessel_code_int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">speed_differences</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">jsonify</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No data found for this vessel or no speed differences calculated.&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+            <span class="mi">404</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Speed differences for the vessel&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
+                <span class="s2">&quot;speed_differences&quot;</span><span class="p">:</span> <span class="n">speed_differences</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">),</span>
+        <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="vessel_compliance_comparison">
+<a class="viewcode-back" href="../../api.html#app.views.vessel_compliance_comparison">[docs]</a>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
+    <span class="s2">&quot;/api/vessel_compliance_comparison/&lt;vessel_code1&gt;/&lt;vessel_code2&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">vessel_compliance_comparison</span><span class="p">(</span><span class="n">vessel_code1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">vessel_code2</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compares the compliance scores between two vessels based on their speed adherence.</span>
+
+<span class="sd">    :param vessel_code1: The unique code identifying the first vessel.</span>
+<span class="sd">    :param vessel_code2: The unique code identifying the second vessel.</span>
+<span class="sd">    :return: A JSON response indicating the comparison result.</span>
+<span class="sd">    :rtype: Response</span>
+
+<span class="sd">    Example response::</span>
+
+<span class="sd">            {</span>
+<span class="sd">                &quot;message&quot;: &quot;Vessel 19310 is more compliant with a compliance score of 83.54%</span>
+<span class="sd">                            compared to Vessel 3001&#39;s score of 72.11%.&quot;</span>
+<span class="sd">            }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">vessel_code1_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code1</span><span class="p">)</span>
+        <span class="n">vessel_code2_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code2</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid vessel code format.&quot;</span><span class="p">}),</span> <span class="mi">400</span>
+
+    <span class="n">comparison_result</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">compare_vessel_compliance</span><span class="p">(</span>
+        <span class="n">vessel_code1_int</span><span class="p">,</span> <span class="n">vessel_code2_int</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Check if the result is an error message indicating a non-existent vessel code</span>
+    <span class="k">if</span> <span class="s2">&quot;does not exist&quot;</span> <span class="ow">in</span> <span class="n">comparison_result</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">comparison_result</span><span class="p">}),</span> <span class="mi">404</span>
+
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">comparison_result</span><span class="p">})</span></div>
+
+
+
+<div class="viewcode-block" id="get_vessel_metrics">
+<a class="viewcode-back" href="../../api.html#app.views.get_vessel_metrics">[docs]</a>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/api/vessel_metrics/&lt;vessel_code&gt;/&lt;start_date&gt;/&lt;end_date&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_vessel_metrics</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves metrics for a specific vessel within a given time period.</span>
+
+<span class="sd">    :param vessel_code: The unique code identifying the vessel.</span>
+<span class="sd">    :param start_date: The start date of the period (inclusive).</span>
+<span class="sd">    :param end_date: The end date of the period (inclusive).</span>
+<span class="sd">    :return: A JSON response containing the metrics for the specified vessel and period.</span>
+<span class="sd">    :rtype: Response</span>
+
+<span class="sd">    Example response::</span>
+
+<span class="sd">            [</span>
+<span class="sd">                {</span>
+<span class="sd">                    &quot;vessel_code&quot;: 3001,</span>
+<span class="sd">                    &quot;datetime&quot;: &quot;2023-06-01 00:01:00&quot;,</span>
+<span class="sd">                    &quot;latitude&quot;: 10.2894496918,</span>
+<span class="sd">                    &quot;longitude&quot;: -14.7888498306,</span>
+<span class="sd">                    &quot;power&quot;: 0.0,</span>
+<span class="sd">                    &quot;fuel_consumption&quot;: 0.0,</span>
+<span class="sd">                    &quot;actual_speed_overground&quot;: 0.09999,</span>
+<span class="sd">                    &quot;proposed_speed_overground&quot;: 0.9464979896,</span>
+<span class="sd">                    &quot;predicted_fuel_consumption&quot;: 0.0,</span>
+<span class="sd">                    &quot;speed_difference&quot;: 0.8465079896</span>
+<span class="sd">                }</span>
+<span class="sd">                ...</span>
+<span class="sd">            ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid vessel code format.&quot;</span><span class="p">}),</span> <span class="mi">400</span>
+
+    <span class="n">metrics_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_metrics_for_vessel_period</span><span class="p">(</span>
+        <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Use .empty to check if the DataFrame is empty</span>
+    <span class="k">if</span> <span class="n">metrics_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">jsonify</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No data found for this vessel within the specified period.&quot;</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+            <span class="mi">404</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">metrics_json</span> <span class="o">=</span> <span class="n">metrics_data</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">metrics_json</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_vessel_raw_metrics">
+<a class="viewcode-back" href="../../api.html#app.views.get_vessel_raw_metrics">[docs]</a>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
+    <span class="s2">&quot;/api/vessel_raw_metrics/&lt;vessel_code&gt;/&lt;start_date&gt;/&lt;end_date&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_vessel_raw_metrics</span><span class="p">(</span>
+    <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves raw data metrics for a specific vessel over a specified period.</span>
+
+<span class="sd">    :param vessel_code: The unique code identifying the vessel.</span>
+<span class="sd">    :param start_date: The start date of the period (inclusive).</span>
+<span class="sd">    :param end_date: The end date of the period (inclusive).</span>
+<span class="sd">    :return: A JSON response containing the raw data for the vessel within the specified period.</span>
+<span class="sd">    :rtype: Response</span>
+
+<span class="sd">    Example response::</span>
+
+
+<span class="sd">            [</span>
+<span class="sd">                {</span>
+<span class="sd">                    &quot;vessel_code&quot;: 3001,</span>
+<span class="sd">                    &quot;datetime&quot;: &quot;2023-06-01 00:00:00&quot;,</span>
+<span class="sd">                    &quot;latitude&quot;: 10.2894458771,</span>
+<span class="sd">                    &quot;longitude&quot;: -14.7888755798,</span>
+<span class="sd">                    &quot;power&quot;: 0.0,</span>
+<span class="sd">                    &quot;fuel_consumption&quot;: 0.0,</span>
+<span class="sd">                    &quot;actual_speed_overground&quot;: 0.039996,</span>
+<span class="sd">                    &quot;proposed_speed_overground&quot;: -0.1899042625,</span>
+<span class="sd">                    &quot;predicted_fuel_consumption&quot;: 0.0</span>
+<span class="sd">                }</span>
+<span class="sd">                ...</span>
+<span class="sd">            ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid vessel code format.&quot;</span><span class="p">}),</span> <span class="mi">400</span>
+
+    <span class="n">raw_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_raw_metrics_for_vessel_period</span><span class="p">(</span>
+        <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">jsonify</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No raw data found for this vessel within the specified period.&quot;</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+            <span class="mi">404</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">raw_data_json</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">raw_data_json</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">])</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, CortoMaltese3.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

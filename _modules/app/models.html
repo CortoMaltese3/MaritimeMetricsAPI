@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>app.models &mdash; MarineMetricsAPI v0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=fa47ad08"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MarineMetricsAPI
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Models Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html#module-app.views">Views Module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MarineMetricsAPI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">app.models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for app.models</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module defining the data models and business logic for the maritime data application.</span>
+
+<span class="sd">Includes classes and methods for loading and processing maritime data, such as</span>
+<span class="sd">filtering invalid data, calculating compliance scores, and comparing vessel metrics.</span>
+<span class="sd">The primary class, `MaritimeData`, encapsulates the logic for data handling, including</span>
+<span class="sd">loading from CSV, data cleansing, and metrics computation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
+
+<div class="viewcode-block" id="MaritimeData">
+<a class="viewcode-back" href="../../api.html#app.models.MaritimeData">[docs]</a>
+<span class="k">class</span> <span class="nc">MaritimeData</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manages maritime data operations, including loading, filtering, and processing vessel data.</span>
+
+<span class="sd">    The class provides functionality to load vessel data from a CSV file, apply several filters</span>
+<span class="sd">    to clean the data, and calculate metrics for vessels over specified periods.</span>
+
+<span class="sd">    :param csv_path: Path to the CSV file containing maritime data.</span>
+<span class="sd">    :type csv_path: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">csv_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the MaritimeData class with the path to the data CSV.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv_path</span> <span class="o">=</span> <span class="n">csv_path</span>
+        <span class="c1"># Load raw data from CSV</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_csv</span><span class="p">()</span>
+        <span class="c1"># Create a copy of raw data to apply filters and preserve the original data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># Store information about invalid data to be used in the API</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalid_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original dataset size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="c1"># Apply data cleansing filters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_filter_invalid_data</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filtered dataset size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_load_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads maritime data from a CSV file.</span>
+
+<span class="sd">        Attempts to read the maritime data CSV file into a pandas DataFrame. If the file</span>
+<span class="sd">        is not found, or another exception occurs during loading, it handles the exception</span>
+<span class="sd">        gracefully by printing an error message and returning an empty DataFrame.</span>
+
+<span class="sd">        :return: A DataFrame with the loaded maritime data, or an empty DataFrame if</span>
+<span class="sd">                the file cannot be loaded.</span>
+<span class="sd">        :rtype: pd.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Load the CSV file into a DataFrame.</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CSV file not found.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An unexpected error occurred: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_filter_invalid_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a series of data cleansing filters to the loaded maritime data.</span>
+
+<span class="sd">        This method sequentially calls other methods to filter out rows based on</span>
+<span class="sd">        specific criteria: values below zero, missing values, statistical outliers,</span>
+<span class="sd">        and invalid geocoordinates. This process cleans the dataset, preparing it</span>
+<span class="sd">        for further analysis and usage within the application.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_below_zero</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_missing_values</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_outliers</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_invalid_geocoordinates</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_filter_below_zero</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Filters out records with negative values in specified numerical columns.</span>
+
+<span class="sd">        Identifies and removes rows from `self.filtered_data` where values in critical</span>
+<span class="sd">        numerical columns such as power, fuel consumption, and speed over ground are</span>
+<span class="sd">        below zero, as these values are considered invalid for the dataset&#39;s context.</span>
+
+<span class="sd">        The columns checked are: &#39;power&#39;, &#39;fuel_consumption&#39;, &#39;actual_speed_overground&#39;,</span>
+<span class="sd">        &#39;proposed_speed_overground&#39;, and &#39;predicted_fuel_consumption&#39;.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Define the condition for filtering out rows where the specified columns are below zero.</span>
+        <span class="c1"># We specify these columns to avoid filtering out lat/long values that could be valid.</span>
+
+        <span class="k">def</span> <span class="nf">get_below_zero</span><span class="p">(</span><span class="n">column</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Get rows with values below zero in the specified column.&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">column</span> <span class="o">&lt;</span> <span class="mi">0</span>
+
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;power&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fuel_consumption&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;actual_speed_overground&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;predicted_fuel_consumption&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_by_condition</span><span class="p">(</span><span class="n">get_below_zero</span><span class="p">,</span> <span class="s2">&quot;below_zero&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_filter_missing_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes records with missing (NA) values in critical columns.</span>
+
+<span class="sd">        Targets specific columns for checking missing values, including vessel identifiers,</span>
+<span class="sd">        timestamps, geocoordinates, and various performance metrics. Rows with any missing</span>
+<span class="sd">        values in these columns are considered incomplete and are removed from the dataset.</span>
+
+<span class="sd">        Target columns: &#39;vessel_code&#39;, &#39;datetime&#39;, &#39;latitude&#39;, &#39;longitude&#39;, &#39;power&#39;,</span>
+<span class="sd">        &#39;fuel_consumption&#39;, &#39;actual_speed_overground&#39;, &#39;proposed_speed_overground&#39;,</span>
+<span class="sd">        and &#39;predicted_fuel_consumption&#39;.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Define the condition for filtering out rows where the specified columns have</span>
+        <span class="c1"># missing values.</span>
+        <span class="k">def</span> <span class="nf">get_missing_columns</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Get columns with missing values.&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">col</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
+
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;vessel_code&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;datetime&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;power&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fuel_consumption&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;actual_speed_overground&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;predicted_fuel_consumption&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_by_condition</span><span class="p">(</span><span class="n">get_missing_columns</span><span class="p">,</span> <span class="s2">&quot;missing_value&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_filter_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Identifies and removes outliers based on Z-scores in specified numerical columns.</span>
+
+<span class="sd">        Applies a statistical method to detect and exclude outliers from the dataset. An</span>
+<span class="sd">        outlier is defined as a data point that is more than two standard deviations away</span>
+<span class="sd">        from the mean. This method ensures the data&#39;s consistency by retaining only values</span>
+<span class="sd">        within a reasonable range, enhancing the reliability of subsequent analyses.</span>
+
+<span class="sd">        Outlier detection is applied to columns: &#39;power&#39;, &#39;fuel_consumption&#39;,</span>
+<span class="sd">        &#39;actual_speed_overground&#39;, &#39;proposed_speed_overground&#39;, and &#39;predicted_fuel_consumption&#39;.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Define the condition for filtering out rows where the specified columns have outliers.</span>
+        <span class="c1"># z-scores can be adjusted depending on the situation.</span>
+        <span class="c1"># We specify these columns to only apply filtering in numerical columns.</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;power&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fuel_consumption&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;actual_speed_overground&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;predicted_fuel_consumption&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="c1"># Check if the column exists and is numerical (rule out strings and mixed types)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="o">.</span><span class="n">columns</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="s2">&quot;object&quot;</span>
+            <span class="p">):</span>
+                <span class="c1"># dropna() ensures no NaN values are included in the z-score calculation</span>
+                <span class="c1"># This can be adjusted depending on how strict we want to be.</span>
+                <span class="c1"># Leave it as 2 for now.</span>
+                <span class="n">z_scores</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">zscore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">())</span>
+                <span class="n">outlier_mask</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">z_scores</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span>
+
+                <span class="c1"># Create a mask that aligns with the original data with the default value</span>
+                <span class="c1"># set to False</span>
+                <span class="n">full_mask</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                <span class="c1"># Update the mask with the outlier values</span>
+                <span class="n">non_na_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+                <span class="c1"># Ensure alignment with the original data</span>
+                <span class="n">full_mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">non_na_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlier_mask</span>
+
+                <span class="c1"># Apply the mask using the defined function</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_filter_by_condition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">col</span><span class="p">:</span> <span class="n">full_mask</span><span class="p">,</span> <span class="s2">&quot;outlier&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">column</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_filter_invalid_geocoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Filters out records with geocoordinate values outside valid global ranges.</span>
+
+<span class="sd">        Validates latitude and longitude values by ensuring they fall within the</span>
+<span class="sd">        acceptable global range: latitudes between -90 and 90, and longitudes</span>
+<span class="sd">        between -180 and 180 degrees. Records outside these ranges are considered</span>
+<span class="sd">        invalid and are removed, improving the geographic data&#39;s accuracy.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">get_invalid_latitude</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Get rows with invalid latitude values.&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">col</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">90</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">col</span> <span class="o">&gt;</span> <span class="mi">90</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">get_invalid_longitude</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Get rows with invalid longitude values.&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">col</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">180</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">col</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_by_condition</span><span class="p">(</span>
+            <span class="n">get_invalid_latitude</span><span class="p">,</span> <span class="s2">&quot;invalid_latitude&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_by_condition</span><span class="p">(</span>
+            <span class="n">get_invalid_longitude</span><span class="p">,</span> <span class="s2">&quot;invalid_longitude&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_filter_by_condition</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">condition_func</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">problem_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a filtering condition to specified columns and updates invalid data tracking.</span>
+
+<span class="sd">        This generic method applies a given condition to filter data across specified columns,</span>
+<span class="sd">        updates the filtered data, and logs details of filtered records by problem type and</span>
+<span class="sd">        vessel code.</span>
+
+<span class="sd">        :param condition_func: A function defining the condition to filter the data by.</span>
+<span class="sd">        :param problem_type: A description of the problem type for logging.</span>
+<span class="sd">        :param columns: A list of column names to apply the filtering condition to.</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">condition_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">column</span><span class="p">])</span>
+            <span class="n">valid_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">filtered_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+            <span class="c1"># Update the main data with rows where the condition is not met.</span>
+            <span class="c1"># Add this approach to filter out the invalid rows instead of marking them as invalid</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span> <span class="o">=</span> <span class="n">valid_rows</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">filtered_rows</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">summary</span> <span class="o">=</span> <span class="n">filtered_rows</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;vessel_code&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">vessel_code</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">invalid_data</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                        <span class="n">problem_type</span><span class="p">,</span> <span class="p">{}</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">invalid_data</span><span class="p">[</span><span class="n">vessel_code</span><span class="p">][</span><span class="n">problem_type</span><span class="p">][</span><span class="n">column</span><span class="p">]</span> <span class="o">+=</span> <span class="n">count</span>
+
+<div class="viewcode-block" id="MaritimeData.get_invalid_data_for_vessel">
+<a class="viewcode-back" href="../../api.html#app.models.MaritimeData.get_invalid_data_for_vessel">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_invalid_data_for_vessel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a summary of invalid data entries for a specific vessel.</span>
+
+<span class="sd">        Organizes invalid data entries by problem type and affected columns, providing</span>
+<span class="sd">        a detailed breakdown of issues identified in the vessel&#39;s data.</span>
+
+<span class="sd">        :param vessel_code: The unique identifier for the vessel.</span>
+<span class="sd">        :return: A nested dictionary summarizing invalid data by problem type and column.</span>
+<span class="sd">        :rtype: Dict[str, Dict[str, Dict[str, int]]]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sorted_summary</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">vessel_code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_data</span><span class="p">:</span>
+            <span class="n">vessel_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_data</span><span class="p">[</span><span class="n">vessel_code</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">problem_type</span><span class="p">,</span> <span class="n">columns</span> <span class="ow">in</span> <span class="n">vessel_summary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">sorted_columns</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                    <span class="n">columns</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+                <span class="n">sorted_summary</span><span class="p">[</span><span class="n">problem_type</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">sorted_columns</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sorted_summary</span></div>
+
+
+<div class="viewcode-block" id="MaritimeData.get_speed_differences_for_vessel">
+<a class="viewcode-back" href="../../api.html#app.models.MaritimeData.get_speed_differences_for_vessel">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_speed_differences_for_vessel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the speed differences between actual and proposed speeds for a vessel.</span>
+
+<span class="sd">        For each record pertaining to the specified vessel, computes the absolute difference</span>
+<span class="sd">        between actual and proposed speeds over ground, adding these as a new metric.</span>
+
+<span class="sd">        :param vessel_code: The unique identifier for the vessel.</span>
+<span class="sd">        :return: A list of dictionaries, each containing latitude, longitude, and the calculated</span>
+<span class="sd">                speed difference for a record.</span>
+<span class="sd">        :rtype: List[Dict[str, Any]]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vessel_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;vessel_code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">vessel_code</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">vessel_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="n">vessel_data</span><span class="p">[</span><span class="s2">&quot;speed_difference&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span>
+            <span class="n">vessel_data</span><span class="p">[</span><span class="s2">&quot;actual_speed_overground&quot;</span><span class="p">]</span>
+            <span class="o">-</span> <span class="n">vessel_data</span><span class="p">[</span><span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">speed_differences</span> <span class="o">=</span> <span class="n">vessel_data</span><span class="p">[[</span><span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;speed_difference&quot;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="n">speed_differences</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MaritimeData.calculate_compliance_score">
+<a class="viewcode-back" href="../../api.html#app.models.MaritimeData.calculate_compliance_score">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_compliance_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes a compliance score based on the deviation from proposed speeds.</span>
+
+<span class="sd">        The score is an average percentage representing how closely the vessel&#39;s actual</span>
+<span class="sd">        speed adheres to proposed speeds, with higher scores indicating closer adherence.</span>
+
+<span class="sd">        :param vessel_code: The unique identifier for the vessel.</span>
+<span class="sd">        :return: The compliance score as a float rounded to two decimal places.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vessel_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;vessel_code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">vessel_code</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Avoid division by zero by filtering out proposed speeds that are exactly zero</span>
+        <span class="n">vessel_data</span> <span class="o">=</span> <span class="n">vessel_data</span><span class="p">[</span><span class="n">vessel_data</span><span class="p">[</span><span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vessel_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>  <span class="c1"># Return 0 compliance if there&#39;s no data to calculate on</span>
+
+        <span class="c1"># Calculate the percentage difference between actual and proposed speeds</span>
+        <span class="n">vessel_data</span><span class="p">[</span><span class="s2">&quot;percentage_difference&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">abs</span><span class="p">(</span>
+                <span class="n">vessel_data</span><span class="p">[</span><span class="s2">&quot;actual_speed_overground&quot;</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">vessel_data</span><span class="p">[</span><span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">/</span> <span class="n">vessel_data</span><span class="p">[</span><span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+        <span class="c1"># Calculate the average of these percentage differences and subtract from 100</span>
+        <span class="n">compliance_score</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="n">vessel_data</span><span class="p">[</span><span class="s2">&quot;percentage_difference&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="c1"># Return the score formatted to two decimal places</span>
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">compliance_score</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MaritimeData.compare_vessel_compliance">
+<a class="viewcode-back" href="../../api.html#app.models.MaritimeData.compare_vessel_compliance">[docs]</a>
+    <span class="k">def</span> <span class="nf">compare_vessel_compliance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">vessel_code2</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compares the compliance scores of two vessels and indicates which is more compliant.</span>
+
+<span class="sd">        Calculates compliance scores for both vessels based on their adherence to proposed speeds</span>
+<span class="sd">        and returns a message comparing these scores.</span>
+
+<span class="sd">        :param vessel_code1: Unique identifier for the first vessel.</span>
+<span class="sd">        :param vessel_code2: Unique identifier for the second vessel.</span>
+<span class="sd">        :return: Message indicating which vessel is more compliant or if they have eq compliance.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if the vessel codes exist in the dataset</span>
+        <span class="k">if</span> <span class="n">vessel_code1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;vessel_code&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Vessel code </span><span class="si">{</span><span class="n">vessel_code1</span><span class="si">}</span><span class="s2"> does not exist.&quot;</span>
+
+        <span class="k">if</span> <span class="n">vessel_code2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;vessel_code&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Vessel code </span><span class="si">{</span><span class="n">vessel_code2</span><span class="si">}</span><span class="s2"> does not exist.&quot;</span>
+
+        <span class="n">score1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_compliance_score</span><span class="p">(</span><span class="n">vessel_code1</span><span class="p">)</span>
+        <span class="n">score2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_compliance_score</span><span class="p">(</span><span class="n">vessel_code2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">score1</span> <span class="o">&gt;</span> <span class="n">score2</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Vessel </span><span class="si">{</span><span class="n">vessel_code1</span><span class="si">}</span><span class="s2"> is more compliant with a compliance &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;score of </span><span class="si">{</span><span class="n">score1</span><span class="si">}</span><span class="s2">% compared to Vessel </span><span class="si">{</span><span class="n">vessel_code2</span><span class="si">}</span><span class="s2">&#39;s &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;score of </span><span class="si">{</span><span class="n">score2</span><span class="si">}</span><span class="s2">%.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">message</span>
+        <span class="k">if</span> <span class="n">score2</span> <span class="o">&gt;</span> <span class="n">score1</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Vessel </span><span class="si">{</span><span class="n">vessel_code2</span><span class="si">}</span><span class="s2"> is more compliant with a compliance &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;score of </span><span class="si">{</span><span class="n">score2</span><span class="si">}</span><span class="s2">% compared to Vessel </span><span class="si">{</span><span class="n">vessel_code1</span><span class="si">}</span><span class="s2">&#39;s &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;score of </span><span class="si">{</span><span class="n">score1</span><span class="si">}</span><span class="s2">%.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">message</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Both vessels have the same compliance score of </span><span class="si">{</span><span class="n">score1</span><span class="si">}</span><span class="s2">%.&quot;</span></div>
+
+
+<div class="viewcode-block" id="MaritimeData.get_metrics_for_vessel_period">
+<a class="viewcode-back" href="../../api.html#app.models.MaritimeData.get_metrics_for_vessel_period">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_metrics_for_vessel_period</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves filtered data metrics for a specific vessel over a given period.</span>
+
+<span class="sd">        Metrics include calculated speed differences between actual and proposed speeds.</span>
+<span class="sd">        If no data exists for the given period, an empty list is returned.</span>
+
+<span class="sd">        :param vessel_code: Unique identifier for the vessel.</span>
+<span class="sd">        :param start_date: Start of the period in &#39;YYYY-MM-DD&#39; format.</span>
+<span class="sd">        :param end_date: End of the period in &#39;YYYY-MM-DD&#39; format.</span>
+<span class="sd">        :return: List of dictionaries with data for each record within the period.</span>
+<span class="sd">        :rtype: List[Dict[str, Any]]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filtered_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;vessel_code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">vessel_code</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">start_date</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">end_date</span><span class="p">)</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">filtered_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;speed_difference&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span>
+            <span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;actual_speed_overground&quot;</span><span class="p">]</span>
+            <span class="o">-</span> <span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">filtered_data</span></div>
+
+
+<div class="viewcode-block" id="MaritimeData.get_raw_metrics_for_vessel_period">
+<a class="viewcode-back" href="../../api.html#app.models.MaritimeData.get_raw_metrics_for_vessel_period">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_raw_metrics_for_vessel_period</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves raw data metrics for a specific vessel over a given period.</span>
+
+<span class="sd">        Provides unfiltered access to data for in-depth analysis.</span>
+<span class="sd">        but without applying any data cleansing or additional calculations.</span>
+
+<span class="sd">        :param vessel_code: Unique identifier for the vessel.</span>
+<span class="sd">        :param start_date: Start of the period in &#39;YYYY-MM-DD&#39; format.</span>
+<span class="sd">        :param end_date: End of the period in &#39;YYYY-MM-DD&#39; format.</span>
+<span class="sd">        :return: List of dictionaries with raw data for each record within the period.</span>
+<span class="sd">        :rtype: List[Dict[str, Any]]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">raw_data_filtered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="s2">&quot;vessel_code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">vessel_code</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">start_date</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">end_date</span><span class="p">)</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">raw_data_filtered</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, CortoMaltese3.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

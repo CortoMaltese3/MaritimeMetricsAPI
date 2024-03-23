@@ -45,8 +45,26 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Models Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#views-module">Views Module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Models Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#app.models.MaritimeData"><code class="docutils literal notranslate"><span class="pre">MaritimeData</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#app.models.MaritimeData.calculate_compliance_score"><code class="docutils literal notranslate"><span class="pre">MaritimeData.calculate_compliance_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app.models.MaritimeData.compare_vessel_compliance"><code class="docutils literal notranslate"><span class="pre">MaritimeData.compare_vessel_compliance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app.models.MaritimeData.get_invalid_data_for_vessel"><code class="docutils literal notranslate"><span class="pre">MaritimeData.get_invalid_data_for_vessel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app.models.MaritimeData.get_metrics_for_vessel_period"><code class="docutils literal notranslate"><span class="pre">MaritimeData.get_metrics_for_vessel_period()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app.models.MaritimeData.get_raw_metrics_for_vessel_period"><code class="docutils literal notranslate"><span class="pre">MaritimeData.get_raw_metrics_for_vessel_period()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app.models.MaritimeData.get_speed_differences_for_vessel"><code class="docutils literal notranslate"><span class="pre">MaritimeData.get_speed_differences_for_vessel()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-app.views">Views Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#app.views.get_vessel_invalid_data"><code class="docutils literal notranslate"><span class="pre">get_vessel_invalid_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#app.views.get_vessel_metrics"><code class="docutils literal notranslate"><span class="pre">get_vessel_metrics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#app.views.get_vessel_raw_metrics"><code class="docutils literal notranslate"><span class="pre">get_vessel_raw_metrics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#app.views.get_vessel_speed_difference"><code class="docutils literal notranslate"><span class="pre">get_vessel_speed_difference()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#app.views.vessel_compliance_comparison"><code class="docutils literal notranslate"><span class="pre">vessel_compliance_comparison()</span></code></a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -73,11 +91,329 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="models-module">
-<h1>Models Module<a class="headerlink" href="#models-module" title="Link to this heading"></a></h1>
+  <section id="module-app.models">
+<span id="models-module"></span><h1>Models Module<a class="headerlink" href="#module-app.models" title="Link to this heading"></a></h1>
+<p>Module defining the data models and business logic for the maritime data application.</p>
+<p>Includes classes and methods for loading and processing maritime data, such as
+filtering invalid data, calculating compliance scores, and comparing vessel metrics.
+The primary class, <cite>MaritimeData</cite>, encapsulates the logic for data handling, including
+loading from CSV, data cleansing, and metrics computation.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="app.models.MaritimeData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">app.models.</span></span><span class="sig-name descname"><span class="pre">MaritimeData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/models.html#MaritimeData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.models.MaritimeData" title="Link to this definition"></a></dt>
+<dd><p>Manages maritime data operations, including loading, filtering, and processing vessel data.</p>
+<p>The class provides functionality to load vessel data from a CSV file, apply several filters
+to clean the data, and calculate metrics for vessels over specified periods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>csv_path</strong> (<em>str</em>) – Path to the CSV file containing maritime data.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.MaritimeData.calculate_compliance_score">
+<span class="sig-name descname"><span class="pre">calculate_compliance_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/app/models.html#MaritimeData.calculate_compliance_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.models.MaritimeData.calculate_compliance_score" title="Link to this definition"></a></dt>
+<dd><p>Computes a compliance score based on the deviation from proposed speeds.</p>
+<p>The score is an average percentage representing how closely the vessel’s actual
+speed adheres to proposed speeds, with higher scores indicating closer adherence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vessel_code</strong> – The unique identifier for the vessel.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The compliance score as a float rounded to two decimal places.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.MaritimeData.compare_vessel_compliance">
+<span class="sig-name descname"><span class="pre">compare_vessel_compliance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vessel_code2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/app/models.html#MaritimeData.compare_vessel_compliance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.models.MaritimeData.compare_vessel_compliance" title="Link to this definition"></a></dt>
+<dd><p>Compares the compliance scores of two vessels and indicates which is more compliant.</p>
+<p>Calculates compliance scores for both vessels based on their adherence to proposed speeds
+and returns a message comparing these scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vessel_code1</strong> – Unique identifier for the first vessel.</p></li>
+<li><p><strong>vessel_code2</strong> – Unique identifier for the second vessel.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Message indicating which vessel is more compliant or if they have eq compliance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.MaritimeData.get_invalid_data_for_vessel">
+<span class="sig-name descname"><span class="pre">get_invalid_data_for_vessel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/app/models.html#MaritimeData.get_invalid_data_for_vessel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.models.MaritimeData.get_invalid_data_for_vessel" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a summary of invalid data entries for a specific vessel.</p>
+<p>Organizes invalid data entries by problem type and affected columns, providing
+a detailed breakdown of issues identified in the vessel’s data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vessel_code</strong> – The unique identifier for the vessel.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A nested dictionary summarizing invalid data by problem type and column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Dict[str, Dict[str, int]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.MaritimeData.get_metrics_for_vessel_period">
+<span class="sig-name descname"><span class="pre">get_metrics_for_vessel_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/app/models.html#MaritimeData.get_metrics_for_vessel_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.models.MaritimeData.get_metrics_for_vessel_period" title="Link to this definition"></a></dt>
+<dd><p>Retrieves filtered data metrics for a specific vessel over a given period.</p>
+<p>Metrics include calculated speed differences between actual and proposed speeds.
+If no data exists for the given period, an empty list is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vessel_code</strong> – Unique identifier for the vessel.</p></li>
+<li><p><strong>start_date</strong> – Start of the period in ‘YYYY-MM-DD’ format.</p></li>
+<li><p><strong>end_date</strong> – End of the period in ‘YYYY-MM-DD’ format.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of dictionaries with data for each record within the period.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Dict[str, Any]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.MaritimeData.get_raw_metrics_for_vessel_period">
+<span class="sig-name descname"><span class="pre">get_raw_metrics_for_vessel_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/app/models.html#MaritimeData.get_raw_metrics_for_vessel_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.models.MaritimeData.get_raw_metrics_for_vessel_period" title="Link to this definition"></a></dt>
+<dd><p>Retrieves raw data metrics for a specific vessel over a given period.</p>
+<p>Provides unfiltered access to data for in-depth analysis.
+but without applying any data cleansing or additional calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vessel_code</strong> – Unique identifier for the vessel.</p></li>
+<li><p><strong>start_date</strong> – Start of the period in ‘YYYY-MM-DD’ format.</p></li>
+<li><p><strong>end_date</strong> – End of the period in ‘YYYY-MM-DD’ format.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of dictionaries with raw data for each record within the period.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Dict[str, Any]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.MaritimeData.get_speed_differences_for_vessel">
+<span class="sig-name descname"><span class="pre">get_speed_differences_for_vessel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/app/models.html#MaritimeData.get_speed_differences_for_vessel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.models.MaritimeData.get_speed_differences_for_vessel" title="Link to this definition"></a></dt>
+<dd><p>Calculates the speed differences between actual and proposed speeds for a vessel.</p>
+<p>For each record pertaining to the specified vessel, computes the absolute difference
+between actual and proposed speeds over ground, adding these as a new metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vessel_code</strong> – The unique identifier for the vessel.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of dictionaries, each containing latitude, longitude, and the calculated
+speed difference for a record.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Dict[str, Any]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="views-module">
-<h1>Views Module<a class="headerlink" href="#views-module" title="Link to this heading"></a></h1>
+<section id="module-app.views">
+<span id="views-module"></span><h1>Views Module<a class="headerlink" href="#module-app.views" title="Link to this heading"></a></h1>
+<p>Module containing Flask route definitions for the web application.</p>
+<p>This module defines the API endpoints of the web application, handling
+the requests to various functionalities such as retrieving invalid data for vessels,
+comparing vessel compliance scores, and fetching vessel speed differences. Each route
+is associated with a specific function that processes the request and returns a response
+to the client.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="app.views.get_vessel_invalid_data">
+<span class="sig-prename descclassname"><span class="pre">app.views.</span></span><span class="sig-name descname"><span class="pre">get_vessel_invalid_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="_modules/app/views.html#get_vessel_invalid_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.views.get_vessel_invalid_data" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a summary of invalid data for a specific vessel based on its code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vessel_code</strong> – The unique code identifying the vessel.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing a summary of invalid data issues.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Response</p>
+</dd>
+</dl>
+<p>Example response:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Found invalid data for this vessel&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="mi">3001</span><span class="p">,</span>
+    <span class="s2">&quot;invalid_data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;below_zero&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">:</span> <span class="mi">30686</span><span class="p">,</span>
+            <span class="s2">&quot;predicted_fuel_consumption&quot;</span><span class="p">:</span> <span class="mi">1669</span><span class="p">,</span>
+            <span class="s2">&quot;power&quot;</span><span class="p">:</span> <span class="mi">1375</span>
+        <span class="p">}</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.views.get_vessel_metrics">
+<span class="sig-prename descclassname"><span class="pre">app.views.</span></span><span class="sig-name descname"><span class="pre">get_vessel_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="_modules/app/views.html#get_vessel_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.views.get_vessel_metrics" title="Link to this definition"></a></dt>
+<dd><p>Retrieves metrics for a specific vessel within a given time period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vessel_code</strong> – The unique code identifying the vessel.</p></li>
+<li><p><strong>start_date</strong> – The start date of the period (inclusive).</p></li>
+<li><p><strong>end_date</strong> – The end date of the period (inclusive).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing the metrics for the specified vessel and period.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Response</p>
+</dd>
+</dl>
+<p>Example response:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="mi">3001</span><span class="p">,</span>
+        <span class="s2">&quot;datetime&quot;</span><span class="p">:</span> <span class="s2">&quot;2023-06-01 00:01:00&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="mf">10.2894496918</span><span class="p">,</span>
+        <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">14.7888498306</span><span class="p">,</span>
+        <span class="s2">&quot;power&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;fuel_consumption&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;actual_speed_overground&quot;</span><span class="p">:</span> <span class="mf">0.09999</span><span class="p">,</span>
+        <span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">:</span> <span class="mf">0.9464979896</span><span class="p">,</span>
+        <span class="s2">&quot;predicted_fuel_consumption&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;speed_difference&quot;</span><span class="p">:</span> <span class="mf">0.8465079896</span>
+    <span class="p">}</span>
+    <span class="o">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.views.get_vessel_raw_metrics">
+<span class="sig-prename descclassname"><span class="pre">app.views.</span></span><span class="sig-name descname"><span class="pre">get_vessel_raw_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="_modules/app/views.html#get_vessel_raw_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.views.get_vessel_raw_metrics" title="Link to this definition"></a></dt>
+<dd><p>Retrieves raw data metrics for a specific vessel over a specified period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vessel_code</strong> – The unique code identifying the vessel.</p></li>
+<li><p><strong>start_date</strong> – The start date of the period (inclusive).</p></li>
+<li><p><strong>end_date</strong> – The end date of the period (inclusive).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing the raw data for the vessel within the specified period.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Response</p>
+</dd>
+</dl>
+<p>Example response:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="mi">3001</span><span class="p">,</span>
+        <span class="s2">&quot;datetime&quot;</span><span class="p">:</span> <span class="s2">&quot;2023-06-01 00:00:00&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="mf">10.2894458771</span><span class="p">,</span>
+        <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">14.7888755798</span><span class="p">,</span>
+        <span class="s2">&quot;power&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;fuel_consumption&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;actual_speed_overground&quot;</span><span class="p">:</span> <span class="mf">0.039996</span><span class="p">,</span>
+        <span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.1899042625</span><span class="p">,</span>
+        <span class="s2">&quot;predicted_fuel_consumption&quot;</span><span class="p">:</span> <span class="mf">0.0</span>
+    <span class="p">}</span>
+    <span class="o">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.views.get_vessel_speed_difference">
+<span class="sig-prename descclassname"><span class="pre">app.views.</span></span><span class="sig-name descname"><span class="pre">get_vessel_speed_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="_modules/app/views.html#get_vessel_speed_difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.views.get_vessel_speed_difference" title="Link to this definition"></a></dt>
+<dd><p>Provides the speed differences between actual and proposed speeds for a vessel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vessel_code</strong> – The unique code identifying the vessel.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing the speed differences for the vessel.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Response</p>
+</dd>
+</dl>
+<p>Example response:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Speed differences for the vessel&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="mi">19310</span><span class="p">,</span>
+    <span class="s2">&quot;speed_differences&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="mf">49.2837677001953</span><span class="p">,</span>
+            <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">123.177825927734</span><span class="p">,</span>
+            <span class="s2">&quot;speed_difference&quot;</span><span class="p">:</span> <span class="mf">0.747206647694111</span>
+        <span class="p">}</span>
+        <span class="o">...</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.views.vessel_compliance_comparison">
+<span class="sig-prename descclassname"><span class="pre">app.views.</span></span><span class="sig-name descname"><span class="pre">vessel_compliance_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vessel_code2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="_modules/app/views.html#vessel_compliance_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.views.vessel_compliance_comparison" title="Link to this definition"></a></dt>
+<dd><p>Compares the compliance scores between two vessels based on their speed adherence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vessel_code1</strong> – The unique code identifying the first vessel.</p></li>
+<li><p><strong>vessel_code2</strong> – The unique code identifying the second vessel.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response indicating the comparison result.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Response</p>
+</dd>
+</dl>
+<p>Example response:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Vessel 19310 is more compliant with a compliance score of 83.54%</span>
+                <span class="n">compared</span> <span class="n">to</span> <span class="n">Vessel</span> <span class="mi">3001</span><span class="s1">&#39;s score of 72.11%.&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </section>
 
 
