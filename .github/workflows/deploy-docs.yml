@@ -19,11 +19,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install sphinx sphinx_rtd_theme  # Include any other Sphinx extensions you use
+          pip install sphinx sphinx_rtd_theme
 
       - name: Build documentation
         run: |
-          sphinx-build -b html doc/ doc/_build/  # Adjust this line to match your local Sphinx command
+          sphinx-build -b html doc/ doc/_build/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
