@@ -82,7 +82,9 @@
 <span class="sd">to the client.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">Response</span>
 
@@ -93,7 +95,10 @@
 <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">Config</span><span class="p">)</span>
 
 <span class="n">csv_path</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;CSV_PATH&quot;</span><span class="p">]</span>
-<span class="n">maritime_data</span> <span class="o">=</span> <span class="n">MaritimeData</span><span class="p">(</span><span class="n">csv_path</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">maritime_data</span> <span class="o">=</span> <span class="n">MaritimeData</span><span class="p">(</span><span class="n">csv_path</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to initialize MaritimeData with CSV path </span><span class="si">{</span><span class="n">csv_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="get_vessel_invalid_data">
@@ -124,38 +129,39 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
+        <span class="n">invalid_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_invalid_data_for_vessel</span><span class="p">(</span><span class="n">vessel_code_int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">invalid_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">jsonify</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No data found for this vessel.&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">),</span>
+                <span class="mi">404</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Found invalid data for this vessel&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
+                    <span class="s2">&quot;invalid_data&quot;</span><span class="p">:</span> <span class="n">invalid_data</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+            <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid vessel code format received: </span><span class="si">{</span><span class="n">vessel_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">jsonify</span><span class="p">(</span>
                 <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid vessel code format.&quot;</span><span class="p">,</span> <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code</span><span class="p">}</span>
             <span class="p">),</span>
             <span class="mi">400</span><span class="p">,</span>
         <span class="p">)</span>
-
-    <span class="n">invalid_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_invalid_data_for_vessel</span><span class="p">(</span><span class="n">vessel_code_int</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">invalid_data</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">jsonify</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No data found for this vessel.&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="p">),</span>
-            <span class="mi">404</span><span class="p">,</span>
-        <span class="p">)</span>
-
-    <span class="c1"># Added this approach to avoid structure data issues with jsonify messing</span>
-    <span class="c1"># with the dictionary structure</span>
-    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
-        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Found invalid data for this vessel&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
-                <span class="s2">&quot;invalid_data&quot;</span><span class="p">:</span> <span class="n">invalid_data</span><span class="p">,</span>
-            <span class="p">},</span>
-        <span class="p">),</span>
-        <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error retrieving invalid data for vessel </span><span class="si">{</span><span class="n">vessel_code</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;An error occurred processing your request.&quot;</span><span class="p">}),</span> <span class="mi">500</span></div>
 
 
 
@@ -187,36 +193,43 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
+        <span class="n">speed_differences</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_speed_differences_for_vessel</span><span class="p">(</span>
+            <span class="n">vessel_code_int</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">speed_differences</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">jsonify</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No data found for this vessel or no speed differences.&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">),</span>
+                <span class="mi">404</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Speed differences for the vessel&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
+                    <span class="s2">&quot;speed_differences&quot;</span><span class="p">:</span> <span class="n">speed_differences</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">),</span>
+            <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid vessel code format received: </span><span class="si">{</span><span class="n">vessel_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">jsonify</span><span class="p">(</span>
                 <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid vessel code format.&quot;</span><span class="p">,</span> <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code</span><span class="p">}</span>
             <span class="p">),</span>
             <span class="mi">400</span><span class="p">,</span>
         <span class="p">)</span>
-
-    <span class="n">speed_differences</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_speed_differences_for_vessel</span><span class="p">(</span><span class="n">vessel_code_int</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">speed_differences</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">jsonify</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No data found for this vessel or no speed differences calculated.&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="p">),</span>
-            <span class="mi">404</span><span class="p">,</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error retrieving speed differences for vessel </span><span class="si">{</span><span class="n">vessel_code</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
-        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Speed differences for the vessel&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;vessel_code&quot;</span><span class="p">:</span> <span class="n">vessel_code_int</span><span class="p">,</span>
-                <span class="s2">&quot;speed_differences&quot;</span><span class="p">:</span> <span class="n">speed_differences</span><span class="p">,</span>
-            <span class="p">}</span>
-        <span class="p">),</span>
-        <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-    <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;An error occurred processing your request.&quot;</span><span class="p">}),</span> <span class="mi">500</span></div>
 
 
 
@@ -242,20 +255,30 @@
 <span class="sd">            }</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">vessel_code1_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code1</span><span class="p">)</span>
-        <span class="n">vessel_code2_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code2</span><span class="p">)</span>
+        <span class="n">vessel_code1_int</span><span class="p">,</span> <span class="n">vessel_code2_int</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="p">[</span><span class="n">vessel_code1</span><span class="p">,</span> <span class="n">vessel_code2</span><span class="p">])</span>
+        <span class="n">comparison_result</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">compare_vessel_compliance</span><span class="p">(</span>
+            <span class="n">vessel_code1_int</span><span class="p">,</span> <span class="n">vessel_code2_int</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Check if the comparison_result indicates a non-existent vessel code</span>
+        <span class="k">if</span> <span class="s2">&quot;does not exist&quot;</span> <span class="ow">in</span> <span class="n">comparison_result</span><span class="p">:</span>
+            <span class="c1"># This checks if the comparison_result contains a message about non-existence</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;One or both vessel codes do not exist: </span><span class="si">{</span><span class="n">vessel_code1</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">vessel_code2</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">comparison_result</span><span class="p">}),</span> <span class="mi">404</span>
+
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">comparison_result</span><span class="p">})</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid vessel code format received: </span><span class="si">{</span><span class="n">vessel_code1</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">vessel_code2</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid vessel code format.&quot;</span><span class="p">}),</span> <span class="mi">400</span>
-
-    <span class="n">comparison_result</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">compare_vessel_compliance</span><span class="p">(</span>
-        <span class="n">vessel_code1_int</span><span class="p">,</span> <span class="n">vessel_code2_int</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Check if the result is an error message indicating a non-existent vessel code</span>
-    <span class="k">if</span> <span class="s2">&quot;does not exist&quot;</span> <span class="ow">in</span> <span class="n">comparison_result</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">comparison_result</span><span class="p">}),</span> <span class="mi">404</span>
-
-    <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">comparison_result</span><span class="p">})</span></div>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error comparing compliance for vessels </span><span class="si">{</span><span class="n">vessel_code1</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">vessel_code2</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;An error occurred processing your request.&quot;</span><span class="p">}),</span> <span class="mi">500</span></div>
 
 
 
@@ -292,26 +315,33 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid vessel code format.&quot;</span><span class="p">}),</span> <span class="mi">400</span>
-
-    <span class="n">metrics_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_metrics_for_vessel_period</span><span class="p">(</span>
-        <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Use .empty to check if the DataFrame is empty</span>
-    <span class="k">if</span> <span class="n">metrics_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">jsonify</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No data found for this vessel within the specified period.&quot;</span>
-                <span class="p">}</span>
-            <span class="p">),</span>
-            <span class="mi">404</span><span class="p">,</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">[</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">])</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid date format. Use YYYY-MM-DD.&quot;</span><span class="p">)</span>
+        <span class="n">metrics_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_metrics_for_vessel_period</span><span class="p">(</span>
+            <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span>
         <span class="p">)</span>
-
-    <span class="n">metrics_json</span> <span class="o">=</span> <span class="n">metrics_data</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">metrics_json</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">metrics_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">jsonify</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No data found for this vessel within the specified period.&quot;</span>
+                    <span class="p">}</span>
+                <span class="p">),</span>
+                <span class="mi">404</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+            <span class="n">metrics_data</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">),</span> <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid input received: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}),</span> <span class="mi">400</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error retrieving metrics for </span><span class="si">{</span><span class="n">vessel_code</span><span class="si">}</span><span class="s2"> between </span><span class="si">{</span><span class="n">start_date</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">end_date</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;An error occurred processing your request.&quot;</span><span class="p">}),</span> <span class="mi">500</span></div>
 
 
 
@@ -350,28 +380,34 @@
 <span class="sd">                ...</span>
 <span class="sd">            ]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid vessel code format.&quot;</span><span class="p">}),</span> <span class="mi">400</span>
-
-    <span class="n">raw_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_raw_metrics_for_vessel_period</span><span class="p">(</span>
-        <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span>
-    <span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">jsonify</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No raw data found for this vessel within the specified period.&quot;</span>
-                <span class="p">}</span>
-            <span class="p">),</span>
-            <span class="mi">404</span><span class="p">,</span>
+        <span class="c1"># Date validation as performed in get_vessel_metrics</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">[</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">])</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid date format. Use YYYY-MM-DD.&quot;</span><span class="p">)</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_raw_metrics_for_vessel_period</span><span class="p">(</span>
+            <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span>
         <span class="p">)</span>
-
-    <span class="n">raw_data_json</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">raw_data_json</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">jsonify</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No raw data found for this vessel within the specified period.&quot;</span>
+                    <span class="p">}</span>
+                <span class="p">),</span>
+                <span class="mi">404</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">),</span> <span class="n">mimetype</span><span class="o">=</span><span class="s2">&quot;application/json&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid input received: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}),</span> <span class="mi">400</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error retrieving metrics for </span><span class="si">{</span><span class="n">vessel_code</span><span class="si">}</span><span class="s2"> between </span><span class="si">{</span><span class="n">start_date</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">end_date</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;An error occurred processing your request.&quot;</span><span class="p">}),</span> <span class="mi">500</span></div>
 
 
 
