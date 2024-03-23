@@ -9,9 +9,6 @@ __pycache__/
 # Dev
 *.ipynb
 
-# Data
-*.csv
-
 # Documenation
 doc/_build/
 doc/_static/
