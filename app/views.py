@@ -1,5 +1,16 @@
-from flask import Flask, jsonify, Response
+"""
+Module containing Flask route definitions for the web application.
+
+This module defines the API endpoints of the web application, handling
+the requests to various functionalities such as retrieving invalid data for vessels,
+comparing vessel compliance scores, and fetching vessel speed differences. Each route
+is associated with a specific function that processes the request and returns a response
+to the client.
+"""
+
 import json
+
+from flask import Flask, jsonify, Response
 
 from config import Config
 from .models import MaritimeData
@@ -32,7 +43,6 @@ def get_vessel_invalid_data(vessel_code: str) -> Response:
                 "power": 1375
             },
             ...
-    }
     ```
     """
     try:
@@ -145,7 +155,8 @@ def vessel_compliance_comparison(vessel_code1: str, vessel_code2: str) -> Respon
     Example response:
     ```
     {
-        "message": "Vessel 19310 is more compliant with a compliance score of 83.54% compared to Vessel 3001's score of 72.11%."
+        "message": "Vessel 19310 is more compliant with a compliance score of 83.54%
+                    compared to Vessel 3001's score of 72.11%."
     }
     ```
     """

@@ -2,5 +2,6 @@ black==24.3.0
 Flask==3.0.2
 numpy==1.26.4
 pandas==2.2.1
+pylint==3.1.0
 python-dotenv==1.0.1
 scipy==1.12.0

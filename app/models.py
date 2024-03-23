@@ -1,6 +1,16 @@
+"""
+Module defining the data models and business logic for the maritime data application.
+
+Includes classes and methods for loading and processing maritime data, such as
+filtering invalid data, calculating compliance scores, and comparing vessel metrics.
+The primary class, `MaritimeData`, encapsulates the logic for data handling, including
+loading from CSV, data cleansing, and metrics computation.
+"""
+
+from typing import Any, Dict, List
+
 import pandas as pd
 from scipy import stats
-from typing import Any, Dict, List
 
 
 class MaritimeData:
@@ -84,7 +94,11 @@ class MaritimeData:
         """
         # Define the condition for filtering out rows where the specified columns are below zero.
         # We specify these columns to avoid filtering out lat/long values that could be valid.
-        condition = lambda col: col < 0
+
+        def get_below_zero(df, column):
+            """Get rows with values below zero in the specified column."""
+            return df[column] < 0
+
         columns = [
             "power",
             "fuel_consumption",
@@ -92,7 +106,7 @@ class MaritimeData:
             "proposed_speed_overground",
             "predicted_fuel_consumption",
         ]
-        self._filter_by_condition(condition, "below_zero", columns=columns)
+        self._filter_by_condition(get_below_zero, "below_zero", columns=columns)
 
     def _filter_missing_values(self) -> None:
         """
@@ -108,8 +122,14 @@ class MaritimeData:
 
         :return: None
         """
-        # Define the condition for filtering out rows where the specified columns have missing values.
-        condition = lambda col: col.isna()
+
+        # Define the condition for filtering out rows where the specified columns have
+        # missing values.
+
+        def get_missing_columns(df):
+            """Get columns with missing values."""
+            return df.columns[df.isnull().any()].tolist()
+
         columns = [
             "vessel_code",
             "datetime",
@@ -121,7 +141,7 @@ class MaritimeData:
             "proposed_speed_overground",
             "predicted_fuel_consumption",
         ]
-        self._filter_by_condition(condition, "missing_value", columns=columns)
+        self._filter_by_condition(get_missing_columns, "missing_value", columns=columns)
 
     def _filter_outliers(self) -> None:
         """
@@ -154,19 +174,25 @@ class MaritimeData:
                 and self.filtered_data[column].dtype != "object"
             ):
                 # dropna() ensures no NaN values are included in the z-score calculation
+                # This can be adjusted depending on how strict we want to be.
+                # Leave it as 2 for now.
                 z_scores = stats.zscore(self.filtered_data[column].dropna())
-                outlier_mask = (
-                    abs(z_scores) > 2
-                )  # This can be adjusted depending on how strict we want to be. Leave it as 2 for now.
+                outlier_mask = abs(z_scores) > 2
 
-                # Create a mask that aligns with the original data with the default value set to False
+                # Create a mask that aligns with the original data with the default value
+                # set to False
                 full_mask = pd.Series(False, index=self.filtered_data.index)
                 # Update the mask with the outlier values
                 non_na_indices = self.filtered_data[column].dropna().index
                 # Ensure alignment with the original data
                 full_mask.loc[non_na_indices] = outlier_mask.values
 
-                self._filter_by_condition(lambda col: full_mask, "outlier", [column])
+                # Define a function to apply the mask
+                def apply_mask(mask=full_mask):
+                    return mask
+
+                # Apply the mask using the defined function
+                self._filter_by_condition(apply_mask, "outlier", [column])
 
     def _filter_invalid_geocoordinates(self) -> None:
         """
@@ -179,12 +205,20 @@ class MaritimeData:
 
         :return: None
         """
-        latitude_condition = lambda col: (col < -90) | (col > 90)
-        longitude_condition = lambda col: (col < -180) | (col > 180)
 
-        self._filter_by_condition(latitude_condition, "invalid_latitude", ["latitude"])
+        def get_invalid_latitude(df):
+            """Get rows with invalid latitude values."""
+            return (df["latitude"] < -90) | (df["latitude"] > 90)
+
+        def get_invalid_longitude(df):
+            """Get rows with invalid longitude values."""
+            return (df["longitude"] < -180) | (df["longitude"] > 180)
+
         self._filter_by_condition(
-            longitude_condition, "invalid_longitude", ["longitude"]
+            get_invalid_latitude, "invalid_latitude", ["latitude"]
+        )
+        self._filter_by_condition(
+            get_invalid_longitude, "invalid_longitude", ["longitude"]
         )
 
     def _filter_by_condition(
@@ -232,15 +266,15 @@ class MaritimeData:
         :return: A nested dictionary summarizing invalid data by problem type and column.
         :rtype: Dict[str, Dict[str, Dict[str, int]]]
         """
+        sorted_summary = {}
         if vessel_code in self.invalid_data:
             vessel_summary = self.invalid_data[vessel_code]
-            sorted_summary = {}
             for problem_type, columns in vessel_summary.items():
                 sorted_columns = sorted(
                     columns.items(), key=lambda x: x[1], reverse=True
                 )
                 sorted_summary[problem_type] = dict(sorted_columns)
-            return sorted_summary
+        return sorted_summary
 
     def get_speed_differences_for_vessel(
         self, vessel_code: int
@@ -315,7 +349,7 @@ class MaritimeData:
 
         :param vessel_code1: Unique identifier for the first vessel.
         :param vessel_code2: Unique identifier for the second vessel.
-        :return: A message indicating which vessel is more compliant or if they have equal compliance.
+        :return: Message indicating which vessel is more compliant or if they have eq compliance.
         :rtype: str
         """
         # Check if the vessel codes exist in the dataset
@@ -329,11 +363,20 @@ class MaritimeData:
         score2 = self.calculate_compliance_score(vessel_code2)
 
         if score1 > score2:
-            return f"Vessel {vessel_code1} is more compliant with a compliance score of {score1}% compared to Vessel {vessel_code2}'s score of {score2}%."
-        elif score2 > score1:
-            return f"Vessel {vessel_code2} is more compliant with a compliance score of {score2}% compared to Vessel {vessel_code1}'s score of {score1}%."
-        else:
-            return f"Both vessels have the same compliance score of {score1}%."
+            message = (
+                f"Vessel {vessel_code1} is more compliant with a compliance "
+                f"score of {score1}% compared to Vessel {vessel_code2}'s "
+                f"score of {score2}%."
+            )
+            return message
+        if score2 > score1:
+            message = (
+                f"Vessel {vessel_code2} is more compliant with a compliance "
+                f"score of {score2}% compared to Vessel {vessel_code1}'s "
+                f"score of {score1}%."
+            )
+            return message
+        return f"Both vessels have the same compliance score of {score1}%."
 
     def get_metrics_for_vessel_period(
         self, vessel_code: int, start_date: str, end_date: str
@@ -371,7 +414,7 @@ class MaritimeData:
         """
         Retrieves raw data metrics for a specific vessel over a given period.
 
-        Provides unfiltered access to data for in-depth analysis. Similar to get_metrics_for_vessel_period,
+        Provides unfiltered access to data for in-depth analysis.
         but without applying any data cleansing or additional calculations.
 
         :param vessel_code: Unique identifier for the vessel.
@@ -379,7 +422,7 @@ class MaritimeData:
         :param end_date: End of the period in 'YYYY-MM-DD' format.
         :return: List of dictionaries with raw data for each record within the period.
         :rtype: List[Dict[str, Any]]
-        """        
+        """
         raw_data_filtered = self.raw_data[
             (self.raw_data["vessel_code"] == vessel_code)
             & (self.raw_data["datetime"] >= start_date)
