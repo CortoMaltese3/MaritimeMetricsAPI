@@ -8,7 +8,9 @@ is associated with a specific function that processes the request and returns a 
 to the client.
 """
 
+from datetime import datetime
 import json
+import logging
 
 from flask import Flask, jsonify, Response
 
@@ -19,7 +21,10 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 csv_path = app.config["CSV_PATH"]
-maritime_data = MaritimeData(csv_path)
+try:
+    maritime_data = MaritimeData(csv_path)
+except Exception as e:
+    logging.error(f"Failed to initialize MaritimeData with CSV path {csv_path}: {e}")
 
 
 @app.route("/api/vessel_invalid_data/<vessel_code>", methods=["GET"])
@@ -48,38 +53,39 @@ def get_vessel_invalid_data(vessel_code: str) -> Response:
     """
     try:
         vessel_code_int = int(vessel_code)
+        invalid_data = maritime_data.get_invalid_data_for_vessel(vessel_code_int)
+        if not invalid_data:
+            return (
+                jsonify(
+                    {
+                        "message": "No data found for this vessel.",
+                        "vessel_code": vessel_code_int,
+                    }
+                ),
+                404,
+            )
+
+        return Response(
+            json.dumps(
+                {
+                    "message": "Found invalid data for this vessel",
+                    "vessel_code": vessel_code_int,
+                    "invalid_data": invalid_data,
+                }
+            ),
+            mimetype="application/json",
+        )
     except ValueError:
+        logging.warning(f"Invalid vessel code format received: {vessel_code}")
         return (
             jsonify(
                 {"message": "Invalid vessel code format.", "vessel_code": vessel_code}
             ),
             400,
         )
-
-    invalid_data = maritime_data.get_invalid_data_for_vessel(vessel_code_int)
-    if not invalid_data:
-        return (
-            jsonify(
-                {
-                    "message": "No data found for this vessel.",
-                    "vessel_code": vessel_code_int,
-                }
-            ),
-            404,
-        )
-
-    # Added this approach to avoid structure data issues with jsonify messing
-    # with the dictionary structure
-    return Response(
-        json.dumps(
-            {
-                "message": "Found invalid data for this vessel",
-                "vessel_code": vessel_code_int,
-                "invalid_data": invalid_data,
-            },
-        ),
-        mimetype="application/json",
-    )
+    except Exception as e:
+        logging.error(f"Error retrieving invalid data for vessel {vessel_code}: {e}")
+        return jsonify({"message": "An error occurred processing your request."}), 500
 
 
 @app.route("/api/vessel_speed_difference/<vessel_code>", methods=["GET"])
@@ -108,36 +114,43 @@ def get_vessel_speed_difference(vessel_code: str) -> Response:
     """
     try:
         vessel_code_int = int(vessel_code)
+        speed_differences = maritime_data.get_speed_differences_for_vessel(
+            vessel_code_int
+        )
+        if not speed_differences:
+            return (
+                jsonify(
+                    {
+                        "message": "No data found for this vessel or no speed differences.",
+                        "vessel_code": vessel_code_int,
+                    }
+                ),
+                404,
+            )
+
+        return Response(
+            json.dumps(
+                {
+                    "message": "Speed differences for the vessel",
+                    "vessel_code": vessel_code_int,
+                    "speed_differences": speed_differences,
+                }
+            ),
+            mimetype="application/json",
+        )
     except ValueError:
+        logging.warning(f"Invalid vessel code format received: {vessel_code}")
         return (
             jsonify(
                 {"message": "Invalid vessel code format.", "vessel_code": vessel_code}
             ),
             400,
         )
-
-    speed_differences = maritime_data.get_speed_differences_for_vessel(vessel_code_int)
-    if not speed_differences:
-        return (
-            jsonify(
-                {
-                    "message": "No data found for this vessel or no speed differences calculated.",
-                    "vessel_code": vessel_code_int,
-                }
-            ),
-            404,
+    except Exception as e:
+        logging.error(
+            f"Error retrieving speed differences for vessel {vessel_code}: {e}"
         )
-
-    return Response(
-        json.dumps(
-            {
-                "message": "Speed differences for the vessel",
-                "vessel_code": vessel_code_int,
-                "speed_differences": speed_differences,
-            }
-        ),
-        mimetype="application/json",
-    )
+        return jsonify({"message": "An error occurred processing your request."}), 500
 
 
 @app.route(
@@ -160,20 +173,30 @@ def vessel_compliance_comparison(vessel_code1: str, vessel_code2: str) -> Respon
             }
     """
     try:
-        vessel_code1_int = int(vessel_code1)
-        vessel_code2_int = int(vessel_code2)
+        vessel_code1_int, vessel_code2_int = map(int, [vessel_code1, vessel_code2])
+        comparison_result = maritime_data.compare_vessel_compliance(
+            vessel_code1_int, vessel_code2_int
+        )
+
+        # Check if the comparison_result indicates a non-existent vessel code
+        if "does not exist" in comparison_result:
+            # This checks if the comparison_result contains a message about non-existence
+            logging.info(
+                f"One or both vessel codes do not exist: {vessel_code1}, {vessel_code2}"
+            )
+            return jsonify({"message": comparison_result}), 404
+
+        return jsonify({"message": comparison_result})
     except ValueError:
+        logging.warning(
+            f"Invalid vessel code format received: {vessel_code1} or {vessel_code2}"
+        )
         return jsonify({"message": "Invalid vessel code format."}), 400
-
-    comparison_result = maritime_data.compare_vessel_compliance(
-        vessel_code1_int, vessel_code2_int
-    )
-
-    # Check if the result is an error message indicating a non-existent vessel code
-    if "does not exist" in comparison_result:
-        return jsonify({"message": comparison_result}), 404
-
-    return jsonify({"message": comparison_result})
+    except Exception as e:
+        logging.error(
+            f"Error comparing compliance for vessels {vessel_code1} and {vessel_code2}: {e}"
+        )
+        return jsonify({"message": "An error occurred processing your request."}), 500
 
 
 @app.route("/api/vessel_metrics/<vessel_code>/<start_date>/<end_date>", methods=["GET"])
@@ -207,26 +230,33 @@ def get_vessel_metrics(vessel_code: str, start_date: str, end_date: str) -> Resp
     """
     try:
         vessel_code_int = int(vessel_code)
-    except ValueError:
-        return jsonify({"message": "Invalid vessel code format."}), 400
-
-    metrics_data = maritime_data.get_metrics_for_vessel_period(
-        vessel_code_int, start_date, end_date
-    )
-
-    # Use .empty to check if the DataFrame is empty
-    if metrics_data.empty:
-        return (
-            jsonify(
-                {
-                    "message": "No data found for this vessel within the specified period."
-                }
-            ),
-            404,
+        if not all(
+            map(lambda x: datetime.strptime(x, "%Y-%m-%d"), [start_date, end_date])
+        ):
+            raise ValueError("Invalid date format. Use YYYY-MM-DD.")
+        metrics_data = maritime_data.get_metrics_for_vessel_period(
+            vessel_code_int, start_date, end_date
         )
-
-    metrics_json = metrics_data.to_json(orient="records")
-    return Response(metrics_json, mimetype="application/json")
+        if metrics_data.empty:
+            return (
+                jsonify(
+                    {
+                        "message": "No data found for this vessel within the specified period."
+                    }
+                ),
+                404,
+            )
+        return Response(
+            metrics_data.to_json(orient="records"), mimetype="application/json"
+        )
+    except ValueError as e:
+        logging.warning(f"Invalid input received: {e}")
+        return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        logging.error(
+            f"Error retrieving metrics for {vessel_code} between {start_date} and {end_date}: {e}"
+        )
+        return jsonify({"message": "An error occurred processing your request."}), 500
 
 
 @app.route(
@@ -262,28 +292,34 @@ def get_vessel_raw_metrics(
                 ...
             ]
     """
-
     try:
         vessel_code_int = int(vessel_code)
-    except ValueError:
-        return jsonify({"message": "Invalid vessel code format."}), 400
-
-    raw_data = maritime_data.get_raw_metrics_for_vessel_period(
-        vessel_code_int, start_date, end_date
-    )
-
-    if raw_data.empty:
-        return (
-            jsonify(
-                {
-                    "message": "No raw data found for this vessel within the specified period."
-                }
-            ),
-            404,
+        # Date validation as performed in get_vessel_metrics
+        if not all(
+            map(lambda x: datetime.strptime(x, "%Y-%m-%d"), [start_date, end_date])
+        ):
+            raise ValueError("Invalid date format. Use YYYY-MM-DD.")
+        raw_data = maritime_data.get_raw_metrics_for_vessel_period(
+            vessel_code_int, start_date, end_date
         )
-
-    raw_data_json = raw_data.to_json(orient="records")
-    return Response(raw_data_json, mimetype="application/json")
+        if raw_data.empty:
+            return (
+                jsonify(
+                    {
+                        "message": "No raw data found for this vessel within the specified period."
+                    }
+                ),
+                404,
+            )
+        return Response(raw_data.to_json(orient="records"), mimetype="application/json")
+    except ValueError as e:
+        logging.warning(f"Invalid input received: {e}")
+        return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        logging.error(
+            f"Error retrieving metrics for {vessel_code} between {start_date} and {end_date}: {e}"
+        )
+        return jsonify({"message": "An error occurred processing your request."}), 500
 
 
 if __name__ == "__main__":

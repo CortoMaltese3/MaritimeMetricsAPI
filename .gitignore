@@ -13,3 +13,6 @@ __pycache__/
 doc/_build/
 doc/_static/
 doc/_templates/
+
+# Logging
+*.log

@@ -7,9 +7,11 @@ The primary class, `MaritimeData`, encapsulates the logic for data handling, inc
 loading from CSV, data cleansing, and metrics computation.
 """
 
+import logging
 from typing import Any, Dict, List
 
 import pandas as pd
+from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from scipy import stats
 
 
@@ -35,11 +37,11 @@ class MaritimeData:
         self.filtered_data = self.raw_data.copy()
         # Store information about invalid data to be used in the API
         self.invalid_data = {}
-        print(f"Original dataset size: {len(self.raw_data)}")
+        logging.info(f"Original dataset size: {len(self.raw_data)}")
         if not self.raw_data.empty:
             # Apply data cleansing filters
             self._filter_invalid_data()
-            print(f"Filtered dataset size: {len(self.filtered_data)}")
+            logging.info(f"Filtered dataset size: {len(self.filtered_data)}")
 
     def _load_csv(self) -> pd.DataFrame:
         """
@@ -54,13 +56,13 @@ class MaritimeData:
         :rtype: pd.DataFrame
         """
         try:
-            # Load the CSV file into a DataFrame.
-            return pd.read_csv(self.csv_path)
+            df = pd.read_csv(self.csv_path, parse_dates=["datetime"])
+            return df
         except FileNotFoundError:
-            print("CSV file not found.")
+            logging.error("CSV file not found.")
             return pd.DataFrame()
         except Exception as e:
-            print(f"An unexpected error occurred: {e}")
+            logging.error(f"An unexpected error occurred while loading CSV: {e}")
             return pd.DataFrame()
 
     def _filter_invalid_data(self) -> None:
@@ -94,19 +96,22 @@ class MaritimeData:
         """
         # Define the condition for filtering out rows where the specified columns are below zero.
         # We specify these columns to avoid filtering out lat/long values that could be valid.
+        try:
 
-        def get_below_zero(column):
-            """Get rows with values below zero in the specified column."""
-            return column < 0
+            def get_below_zero(column):
+                """Get rows with values below zero in the specified column."""
+                return column < 0
 
-        columns = [
-            "power",
-            "fuel_consumption",
-            "actual_speed_overground",
-            "proposed_speed_overground",
-            "predicted_fuel_consumption",
-        ]
-        self._filter_by_condition(get_below_zero, "below_zero", columns=columns)
+            columns = [
+                "power",
+                "fuel_consumption",
+                "actual_speed_overground",
+                "proposed_speed_overground",
+                "predicted_fuel_consumption",
+            ]
+            self._filter_by_condition(get_below_zero, "below_zero", columns=columns)
+        except Exception as e:
+            logging.error(f"Error filtering below zero: {e}")
 
     def _filter_missing_values(self) -> None:
         """
@@ -125,22 +130,28 @@ class MaritimeData:
 
         # Define the condition for filtering out rows where the specified columns have
         # missing values.
-        def get_missing_columns(col):
-            """Get columns with missing values."""
-            return col.isna()
+        try:
 
-        columns = [
-            "vessel_code",
-            "datetime",
-            "latitude",
-            "longitude",
-            "power",
-            "fuel_consumption",
-            "actual_speed_overground",
-            "proposed_speed_overground",
-            "predicted_fuel_consumption",
-        ]
-        self._filter_by_condition(get_missing_columns, "missing_value", columns=columns)
+            def get_missing_columns(col):
+                return col.isna()
+
+            columns = [
+                "vessel_code",
+                "datetime",
+                "latitude",
+                "longitude",
+                "power",
+                "fuel_consumption",
+                "actual_speed_overground",
+                "proposed_speed_overground",
+                "predicted_fuel_consumption",
+            ]
+
+            self._filter_by_condition(
+                get_missing_columns, "missing_value", columns=columns
+            )
+        except Exception as e:
+            logging.error(f"Failed to filter missing values: {e}")
 
     def _filter_outliers(self) -> None:
         """
@@ -159,35 +170,40 @@ class MaritimeData:
         # Define the condition for filtering out rows where the specified columns have outliers.
         # z-scores can be adjusted depending on the situation.
         # We specify these columns to only apply filtering in numerical columns.
-        columns = [
-            "power",
-            "fuel_consumption",
-            "actual_speed_overground",
-            "proposed_speed_overground",
-            "predicted_fuel_consumption",
-        ]
-        for column in columns:
-            # Check if the column exists and is numerical (rule out strings and mixed types)
-            if (
-                column in self.filtered_data.columns
-                and self.filtered_data[column].dtype != "object"
-            ):
-                # dropna() ensures no NaN values are included in the z-score calculation
-                # This can be adjusted depending on how strict we want to be.
-                # Leave it as 2 for now.
-                z_scores = stats.zscore(self.filtered_data[column].dropna())
-                outlier_mask = abs(z_scores) > 2
+        try:
+            columns = [
+                "power",
+                "fuel_consumption",
+                "actual_speed_overground",
+                "proposed_speed_overground",
+                "predicted_fuel_consumption",
+            ]
+            for column in columns:
+                # Check if the column exists and is numerical (rule out strings and mixed types)
+                if (
+                    column in self.filtered_data.columns
+                    and self.filtered_data[column].dtype != "object"
+                ):
+                    # dropna() ensures no NaN values are included in the z-score calculation
+                    # This can be adjusted depending on how strict we want to be.
+                    # Leave it as 2 for now.
+                    z_scores = stats.zscore(self.filtered_data[column].dropna())
+                    outlier_mask = abs(z_scores) > 2
 
-                # Create a mask that aligns with the original data with the default value
-                # set to False
-                full_mask = pd.Series(False, index=self.filtered_data.index)
-                # Update the mask with the outlier values
-                non_na_indices = self.filtered_data[column].dropna().index
-                # Ensure alignment with the original data
-                full_mask.loc[non_na_indices] = outlier_mask
+                    # Create a mask that aligns with the original data with the default value
+                    # set to False
+                    full_mask = pd.Series(False, index=self.filtered_data.index)
+                    # Update the mask with the outlier values
+                    non_na_indices = self.filtered_data[column].dropna().index
+                    # Ensure alignment with the original data
+                    full_mask.loc[non_na_indices] = outlier_mask
 
-                # Apply the mask using the defined function
-                self._filter_by_condition(lambda col: full_mask, "outlier", [column])
+                    # Apply the mask using the defined function
+                    self._filter_by_condition(
+                        lambda col: full_mask, "outlier", [column]
+                    )
+        except Exception as e:
+            logging.error(f"Failed to filter outliers: {e}")
 
     def _filter_invalid_geocoordinates(self) -> None:
         """
@@ -200,21 +216,24 @@ class MaritimeData:
 
         :return: None
         """
+        try:
 
-        def get_invalid_latitude(col):
-            """Get rows with invalid latitude values."""
-            return (col < -90) | (col > 90)
+            def get_invalid_latitude(col):
+                """Get rows with invalid latitude values."""
+                return (col < -90) | (col > 90)
 
-        def get_invalid_longitude(col):
-            """Get rows with invalid longitude values."""
-            return (col < -180) | (col > 180)
+            def get_invalid_longitude(col):
+                """Get rows with invalid longitude values."""
+                return (col < -180) | (col > 180)
 
-        self._filter_by_condition(
-            get_invalid_latitude, "invalid_latitude", ["latitude"]
-        )
-        self._filter_by_condition(
-            get_invalid_longitude, "invalid_longitude", ["longitude"]
-        )
+            self._filter_by_condition(
+                get_invalid_latitude, "invalid_latitude", ["latitude"]
+            )
+            self._filter_by_condition(
+                get_invalid_longitude, "invalid_longitude", ["longitude"]
+            )
+        except Exception as e:
+            logging.error(f"Failed to filter invalid geocoordinates: {e}")
 
     def _filter_by_condition(
         self, condition_func: Any, problem_type: str, columns: List[str]
@@ -231,22 +250,28 @@ class MaritimeData:
         :param columns: A list of column names to apply the filtering condition to.
         :return: None
         """
-        for column in columns:
-            mask = condition_func(self.filtered_data[column])
-            valid_rows = self.filtered_data.loc[~mask]
-            filtered_rows = self.filtered_data.loc[mask]
+        try:
+            for column in columns:
+                mask = condition_func(self.filtered_data[column])
+                valid_rows = self.filtered_data.loc[~mask]
+                filtered_rows = self.filtered_data.loc[mask]
 
-            # Update the main data with rows where the condition is not met.
-            # Add this approach to filter out the invalid rows instead of marking them as invalid
-            self.filtered_data = valid_rows
+                # Update the main data with rows where the condition is not met.
+                # Add this approach to filter out the invalid rows instead of marking them as 
+                # invalid
+                self.filtered_data = valid_rows
 
-            if not filtered_rows.empty:
-                summary = filtered_rows.groupby("vessel_code").size().to_dict()
-                for vessel_code, count in summary.items():
-                    self.invalid_data.setdefault(vessel_code, {}).setdefault(
-                        problem_type, {}
-                    ).setdefault(column, 0)
-                    self.invalid_data[vessel_code][problem_type][column] += count
+                if not filtered_rows.empty:
+                    summary = filtered_rows.groupby("vessel_code").size().to_dict()
+                    for vessel_code, count in summary.items():
+                        self.invalid_data.setdefault(vessel_code, {}).setdefault(
+                            problem_type, {}
+                        ).setdefault(column, 0)
+                        self.invalid_data[vessel_code][problem_type][column] += count
+        except KeyError as e:
+            logging.error(f"Column error in _filter_by_condition: {e}")
+        except Exception as e:
+            logging.error(f"Unexpected error in _filter_by_condition: {e}")
 
     def get_invalid_data_for_vessel(
         self, vessel_code: int
@@ -388,6 +413,11 @@ class MaritimeData:
         :return: List of dictionaries with data for each record within the period.
         :rtype: List[Dict[str, Any]]
         """
+        # Check if datetime column is in the correct format
+        if not is_datetime(self.filtered_data["datetime"]):
+            logging.error("datetime column in incorrect format")
+            return []
+
         filtered_data = self.filtered_data[
             (self.filtered_data["vessel_code"] == vessel_code)
             & (self.filtered_data["datetime"] >= start_date)
@@ -395,7 +425,8 @@ class MaritimeData:
         ].copy()
 
         if filtered_data.empty:
-            return {}
+            logging.error("No data found for the specified vessel and period.")
+            return []
 
         filtered_data["speed_difference"] = abs(
             filtered_data["actual_speed_overground"]
@@ -418,6 +449,11 @@ class MaritimeData:
         :return: List of dictionaries with raw data for each record within the period.
         :rtype: List[Dict[str, Any]]
         """
+        # Check if datetime column is in the correct format
+        if not is_datetime(self.filtered_data["datetime"]):
+            logging.error("datetime column in incorrect format")
+            return []
+
         raw_data_filtered = self.raw_data[
             (self.raw_data["vessel_code"] == vessel_code)
             & (self.raw_data["datetime"] >= start_date)
