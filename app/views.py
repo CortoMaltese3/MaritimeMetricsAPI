@@ -106,5 +106,58 @@ def vessel_compliance_comparison(vessel_code1, vessel_code2):
     return jsonify({"message": comparison_result})
 
 
+@app.route("/api/vessel_metrics/<vessel_code>/<start_date>/<end_date>", methods=["GET"])
+def get_vessel_metrics(vessel_code, start_date, end_date):
+    try:
+        vessel_code_int = int(vessel_code)
+    except ValueError:
+        return jsonify({"message": "Invalid vessel code format."}), 400
+
+    metrics_data = maritime_data.get_metrics_for_vessel_period(
+        vessel_code_int, start_date, end_date
+    )
+
+    # Use .empty to check if the DataFrame is empty
+    if metrics_data.empty:
+        return (
+            jsonify(
+                {
+                    "message": "No data found for this vessel within the specified period."
+                }
+            ),
+            404,
+        )
+
+    metrics_json = metrics_data.to_json(orient="records")
+    return Response(metrics_json, mimetype="application/json")
+
+
+@app.route(
+    "/api/vessel_raw_metrics/<vessel_code>/<start_date>/<end_date>", methods=["GET"]
+)
+def get_vessel_raw_metrics(vessel_code, start_date, end_date):
+    try:
+        vessel_code_int = int(vessel_code)
+    except ValueError:
+        return jsonify({"message": "Invalid vessel code format."}), 400
+
+    raw_data = maritime_data.get_raw_metrics_for_vessel_period(
+        vessel_code_int, start_date, end_date
+    )
+
+    if raw_data.empty:
+        return (
+            jsonify(
+                {
+                    "message": "No raw data found for this vessel within the specified period."
+                }
+            ),
+            404,
+        )
+
+    raw_data_json = raw_data.to_json(orient="records")
+    return Response(raw_data_json, mimetype="application/json")
+
+
 if __name__ == "__main__":
     app.run(debug=True)

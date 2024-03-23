@@ -6,12 +6,13 @@ from scipy import stats
 class MaritimeData:
     def __init__(self, csv_path):
         self.csv_path = csv_path
-        self.data = self._load_csv()
+        self.raw_data = self._load_csv()
+        self.filtered_data = self.raw_data.copy()
         self.invalid_data = {}
-        print(f"Original dataset size: {len(self.data)}")
-        if not self.data.empty:
+        print(f"Original dataset size: {len(self.raw_data)}")
+        if not self.raw_data.empty:
             self._filter_invalid_data()
-            print(f"Filtered dataset size: {len(self.data)}")
+            print(f"Filtered dataset size: {len(self.filtered_data)}")
 
     def _load_csv(self):
         try:
@@ -64,14 +65,17 @@ class MaritimeData:
             "predicted_fuel_consumption",
         ]
         for column in columns:
-            if column in self.data.columns and self.data[column].dtype != "object":
-                z_scores = stats.zscore(self.data[column].dropna())
+            if (
+                column in self.filtered_data.columns
+                and self.filtered_data[column].dtype != "object"
+            ):
+                z_scores = stats.zscore(self.filtered_data[column].dropna())
                 outlier_mask = (
                     abs(z_scores) > 2
-                )  # This can be adjusted depending on how strict we want to be. Leave it as 1 for now.
+                )  # This can be adjusted depending on how strict we want to be. Leave it as 2 for now.
 
-                full_mask = pd.Series(False, index=self.data.index)
-                non_na_indices = self.data[column].dropna().index
+                full_mask = pd.Series(False, index=self.filtered_data.index)
+                non_na_indices = self.filtered_data[column].dropna().index
                 full_mask.loc[non_na_indices] = outlier_mask.values  # Ensure alignment
 
                 self._filter_by_condition(lambda col: full_mask, "outlier", [column])
@@ -87,13 +91,13 @@ class MaritimeData:
 
     def _filter_by_condition(self, condition_func, problem_type, columns):
         for column in columns:
-            mask = condition_func(self.data[column])
-            valid_rows = self.data.loc[~mask]
-            filtered_rows = self.data.loc[mask]
+            mask = condition_func(self.filtered_data[column])
+            valid_rows = self.filtered_data.loc[~mask]
+            filtered_rows = self.filtered_data.loc[mask]
 
             # Update the main data with rows where the condition is not met.
             # Add this approach to filter out the invalid rows instead of marking them as invalid
-            self.data = valid_rows
+            self.filtered_data = valid_rows
 
             if not filtered_rows.empty:
                 summary = filtered_rows.groupby("vessel_code").size().to_dict()
@@ -115,7 +119,9 @@ class MaritimeData:
             return sorted_summary
 
     def get_speed_differences_for_vessel(self, vessel_code):
-        vessel_data = self.data[self.data["vessel_code"] == vessel_code].copy()
+        vessel_data = self.filtered_data[
+            self.filtered_data["vessel_code"] == vessel_code
+        ].copy()
         if vessel_data.empty:
             return {}
 
@@ -128,7 +134,9 @@ class MaritimeData:
         return speed_differences.to_dict(orient="records")
 
     def calculate_compliance_score(self, vessel_code):
-        vessel_data = self.data[self.data["vessel_code"] == vessel_code].copy()
+        vessel_data = self.filtered_data[
+            self.filtered_data["vessel_code"] == vessel_code
+        ].copy()
 
         # Avoid division by zero by filtering out proposed speeds that are exactly zero
         vessel_data = vessel_data[vessel_data["proposed_speed_overground"] != 0]
@@ -153,10 +161,10 @@ class MaritimeData:
 
     def compare_vessel_compliance(self, vessel_code1, vessel_code2):
         # Check if the vessel codes exist in the dataset
-        if vessel_code1 not in self.data["vessel_code"].values:
+        if vessel_code1 not in self.filtered_data["vessel_code"].values:
             return f"Vessel code {vessel_code1} does not exist."
 
-        if vessel_code2 not in self.data["vessel_code"].values:
+        if vessel_code2 not in self.filtered_data["vessel_code"].values:
             return f"Vessel code {vessel_code2} does not exist."
 
         score1 = self.calculate_compliance_score(vessel_code1)
@@ -168,3 +176,28 @@ class MaritimeData:
             return f"Vessel {vessel_code2} is more compliant with a compliance score of {score2}% compared to Vessel {vessel_code1}'s score of {score1}%."
         else:
             return f"Both vessels have the same compliance score of {score1}%."
+
+    def get_metrics_for_vessel_period(self, vessel_code, start_date, end_date):
+        filtered_data = self.filtered_data[
+            (self.filtered_data["vessel_code"] == vessel_code)
+            & (self.filtered_data["datetime"] >= start_date)
+            & (self.filtered_data["datetime"] <= end_date)
+        ].copy()
+
+        if filtered_data.empty:
+            return {}
+
+        filtered_data["speed_difference"] = abs(
+            filtered_data["actual_speed_overground"]
+            - filtered_data["proposed_speed_overground"]
+        )
+        return filtered_data
+
+    def get_raw_metrics_for_vessel_period(self, vessel_code, start_date, end_date):
+        raw_data_filtered = self.raw_data[
+            (self.raw_data["vessel_code"] == vessel_code)
+            & (self.raw_data["datetime"] >= start_date)
+            & (self.raw_data["datetime"] <= end_date)
+        ].copy()
+
+        return raw_data_filtered
