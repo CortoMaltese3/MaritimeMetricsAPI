@@ -95,9 +95,9 @@ class MaritimeData:
         # Define the condition for filtering out rows where the specified columns are below zero.
         # We specify these columns to avoid filtering out lat/long values that could be valid.
 
-        def get_below_zero(df, column):
+        def get_below_zero(column):
             """Get rows with values below zero in the specified column."""
-            return df[column] < 0
+            return column < 0
 
         columns = [
             "power",
@@ -125,10 +125,9 @@ class MaritimeData:
 
         # Define the condition for filtering out rows where the specified columns have
         # missing values.
-
-        def get_missing_columns(df):
+        def get_missing_columns(col):
             """Get columns with missing values."""
-            return df.columns[df.isnull().any()].tolist()
+            return col.isna()
 
         columns = [
             "vessel_code",
@@ -185,14 +184,10 @@ class MaritimeData:
                 # Update the mask with the outlier values
                 non_na_indices = self.filtered_data[column].dropna().index
                 # Ensure alignment with the original data
-                full_mask.loc[non_na_indices] = outlier_mask.values
-
-                # Define a function to apply the mask
-                def apply_mask(mask=full_mask):
-                    return mask
+                full_mask.loc[non_na_indices] = outlier_mask
 
                 # Apply the mask using the defined function
-                self._filter_by_condition(apply_mask, "outlier", [column])
+                self._filter_by_condition(lambda col: full_mask, "outlier", [column])
 
     def _filter_invalid_geocoordinates(self) -> None:
         """
@@ -206,13 +201,13 @@ class MaritimeData:
         :return: None
         """
 
-        def get_invalid_latitude(df):
+        def get_invalid_latitude(col):
             """Get rows with invalid latitude values."""
-            return (df["latitude"] < -90) | (df["latitude"] > 90)
+            return (col < -90) | (col > 90)
 
-        def get_invalid_longitude(df):
+        def get_invalid_longitude(col):
             """Get rows with invalid longitude values."""
-            return (df["longitude"] < -180) | (df["longitude"] > 180)
+            return (col < -180) | (col > 180)
 
         self._filter_by_condition(
             get_invalid_latitude, "invalid_latitude", ["latitude"]
