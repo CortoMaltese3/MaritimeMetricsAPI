@@ -12,18 +12,13 @@ from datetime import datetime
 import json
 import logging
 
-from flask import jsonify, Response
+from flask import jsonify, Response, request
 from flasgger import swag_from
 
-from .models import MaritimeData
-
+from .data_analysis import DataAnalyzer
 from . import app
 
-csv_path = app.config["CSV_PATH"]
-try:
-    maritime_data = MaritimeData(csv_path)
-except Exception as e:
-    logging.error(f"Failed to initialize MaritimeData with CSV path {csv_path}: {e}")
+maritime_data = app.config["maritime_data"]
 
 
 @app.route("/api/vessel_invalid_data/<vessel_code>", methods=["GET"])
@@ -338,6 +333,43 @@ def get_vessel_raw_metrics(
         logging.error(
             f"Error retrieving metrics for {vessel_code} between {start_date} and {end_date}: {e}"
         )
+        return jsonify({"message": "An error occurred processing your request."}), 500
+
+
+@app.route("/api/vessel_problems/<vessel_code>", methods=["GET"])
+# @swag_from("docs/vessel_problems.yml")  # Make sure to create this YAML file
+def get_vessel_problems(vessel_code: str):
+    """
+    Retrieves a summary of problematic data groups for a specific vessel.
+
+    :param vessel_code: The unique code identifying the vessel.
+    :return: A JSON response containing the summary of problematic data groups.
+    :rtype: Response
+    """
+    problem_type = request.args.get("problem_type", default="missing_values")
+    column_name = request.args.get(
+        "column_name", None
+    )  # Get column_name from query parameters
+
+    if not column_name:
+        logging.warning("Column name must be specified.")
+        return jsonify({"message": "Column name must be specified."}), 400
+
+    try:
+        vessel_code_int = int(vessel_code)
+        data_analyzer = DataAnalyzer()
+        data_analyzer.filter_by_vessel(
+            vessel_code_int
+        )  # Filter the data for the specified vessel
+
+        # Get a summary of problematic data based on the specified problem_type and column_name
+        summary = data_analyzer.get_problematic_data_summary(column_name, problem_type)
+        return jsonify(summary), 200
+    except ValueError as e:
+        logging.warning(f"Invalid input received: {e}")
+        return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        logging.error(f"Error retrieving problem summary for vessel {vessel_code}: {e}")
         return jsonify({"message": "An error occurred processing your request."}), 500
 
 
