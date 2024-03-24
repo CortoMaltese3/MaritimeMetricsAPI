@@ -6,6 +6,20 @@
 Welcome to the MarineMetricsAPI's documentation!
 =================================================
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   api
+   setup
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
 Overview
 --------
 The Marine Metrics API is a Python-based application for analyzing maritime data, including vessel compliance, speed differences, and metrics over specific time periods. It provides a set of functionalities to filter and analyze maritime data to improve decision-making processes in maritime operations.
@@ -13,10 +27,6 @@ The Marine Metrics API is a Python-based application for analyzing maritime data
 Dependencies
 ------------
 The application requires reading data from a CSV file. The path to this CSV file is configurable via the `CSV_PATH` parameter in the `config.py` file. The default dataset is the `data/vessel_data.csv`.
-
-Setup and Running the Application
----------------------------------
-.. include:: ./setup.rst
 
 Logging
 -------
@@ -28,17 +38,27 @@ Developer documentation, including a detailed description of API endpoints and u
 
 Before Opening a Pull Request
 ------------------------------
-Ensure you run the tests and comply with the linting standards before opening a pull request.
+Before opening a pull request, please ensure the following steps are completed to maintain code and documentation quality:
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+1. **Run the Tests**:
+   Ensure that all tests pass successfully to maintain application integrity.
+   .. code-block:: sh
 
-   api
+      python -m unittest tests/test_api.py
 
-Indices and tables
-==================
+2. **Comply with Linting Standards**:
+   Your code should comply with established linting standards. The CI pipeline will fail if these standards are not met.
+   .. code-block:: sh
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+      pylint app/ --fail-under=8
+
+3. **Update the Documentation**:
+   If your changes affect how users interact with the application or add new features, please update the documentation accordingly. Once updates are made, build the documentation locally to ensure it compiles without errors.
+   .. code-block:: sh
+
+      sphinx-build -b html doc/ doc/_build/
+
+   Review the generated HTML files in `doc/_build/` to verify your changes. Include the updated documentation files in your pull request.
+
+4. **Upload Documentation Changes**:
+   Along with your code changes, commit any updated documentation files to ensure the documentation remains current and useful for all users.
