@@ -82,6 +82,7 @@
 <span class="sd">loading from CSV, data cleansing, and metrics computation.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
 
@@ -334,7 +335,7 @@
                 <span class="n">filtered_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 
                 <span class="c1"># Update the main data with rows where the condition is not met.</span>
-                <span class="c1"># Add this approach to filter out the invalid rows instead of marking them as </span>
+                <span class="c1"># Add this approach to filter out the invalid rows instead of marking them as</span>
                 <span class="c1"># invalid</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span> <span class="o">=</span> <span class="n">valid_rows</span>
 
@@ -504,6 +505,20 @@
 <span class="sd">        :return: List of dictionaries with data for each record within the period.</span>
 <span class="sd">        :rtype: List[Dict[str, Any]]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Convert string dates to datetime objects for comparison</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">start_date_obj</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">end_date_obj</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">end_date</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Incorrect date format</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Date format should be YYYY-MM-DD.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Date format should be YYYY-MM-DD.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check if start date is after end date</span>
+        <span class="k">if</span> <span class="n">start_date_obj</span> <span class="o">&gt;</span> <span class="n">end_date_obj</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Start date cannot be after end date.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Start date cannot be after end date.&quot;</span><span class="p">)</span>
+
         <span class="c1"># Check if datetime column is in the correct format</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_datetime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]):</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;datetime column in incorrect format&quot;</span><span class="p">)</span>
@@ -543,6 +558,20 @@
 <span class="sd">        :return: List of dictionaries with raw data for each record within the period.</span>
 <span class="sd">        :rtype: List[Dict[str, Any]]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Convert string dates to datetime objects for comparison</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">start_date_obj</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">end_date_obj</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">end_date</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># Incorrect date format</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Date format should be YYYY-MM-DD.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Date format should be YYYY-MM-DD.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check if start date is after end date</span>
+        <span class="k">if</span> <span class="n">start_date_obj</span> <span class="o">&gt;</span> <span class="n">end_date_obj</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Start date cannot be after end date.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Start date cannot be after end date.&quot;</span><span class="p">)</span>
+
         <span class="c1"># Check if datetime column is in the correct format</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_datetime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]):</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;datetime column in incorrect format&quot;</span><span class="p">)</span>

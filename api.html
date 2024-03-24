@@ -61,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="#module-app.views">Views Module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#app.views.get_vessel_invalid_data"><code class="docutils literal notranslate"><span class="pre">get_vessel_invalid_data()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#app.views.get_vessel_metrics"><code class="docutils literal notranslate"><span class="pre">get_vessel_metrics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#app.views.get_vessel_problems"><code class="docutils literal notranslate"><span class="pre">get_vessel_problems()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#app.views.get_vessel_raw_metrics"><code class="docutils literal notranslate"><span class="pre">get_vessel_raw_metrics()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#app.views.get_vessel_speed_difference"><code class="docutils literal notranslate"><span class="pre">get_vessel_speed_difference()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#app.views.vessel_compliance_comparison"><code class="docutils literal notranslate"><span class="pre">vessel_compliance_comparison()</span></code></a></li>
@@ -317,6 +318,23 @@ to the client.</p>
 <span class="p">]</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.views.get_vessel_problems">
+<span class="sig-prename descclassname"><span class="pre">app.views.</span></span><span class="sig-name descname"><span class="pre">get_vessel_problems</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vessel_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/app/views.html#get_vessel_problems"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.views.get_vessel_problems" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a summary of problematic data groups for a specific vessel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vessel_code</strong> – The unique code identifying the vessel.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing the summary of problematic data groups.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Response</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
