@@ -12,13 +12,11 @@ from datetime import datetime
 import json
 import logging
 
-from flask import Flask, jsonify, Response
+from flask import jsonify, Response
 
-from config import Config
 from .models import MaritimeData
 
-app = Flask(__name__)
-app.config.from_object(Config)
+from . import app
 
 csv_path = app.config["CSV_PATH"]
 try:
