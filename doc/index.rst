@@ -13,13 +13,6 @@ Welcome to the MarineMetricsAPI's documentation!
    api
    setup
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
 Overview
 --------
 The Marine Metrics API is a Python-based application for analyzing maritime data, including vessel compliance, speed differences, and metrics over specific time periods. It provides a set of functionalities to filter and analyze maritime data to improve decision-making processes in maritime operations.
