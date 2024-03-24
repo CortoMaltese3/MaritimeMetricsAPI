@@ -12,9 +12,14 @@ The Marine Metrics API is a Python-based application for analyzing maritime data
 - **Data Filtering**: Filter invalid data, including outliers, missing values, and incorrect geocoordinates.
 - **Reporting**: Report invalid data and produce suggestions.
 
+## Dependencies
+
+The application requires reading data from a CSV file. The path to this CSV file is configurable via the `CSV_PATH` parameter in the `config.py` file. The default dataset is the `data/vessel_data.csv`
+
 ## Setup and Running the Application
 
 ### For Developers
+
 1. **Clone the Repository**:
    ```sh
    git clone https://github.com/CortoMaltese3/MaritimeMetricsAPI.git
@@ -22,6 +27,7 @@ The Marine Metrics API is a Python-based application for analyzing maritime data
    git checkout main
    ```
 2. **Set Up a Virtual Environment** (optional but recommended):
+
    ```sh
    # Using venv
    python -m venv venv
@@ -31,6 +37,7 @@ The Marine Metrics API is a Python-based application for analyzing maritime data
    conda create --name maritime python=3.8
    conda activate maritime
    ```
+
 3. **Install Dependencies**:
    ```sh
    pip install -r requirements.txt
@@ -42,6 +49,7 @@ The Marine Metrics API is a Python-based application for analyzing maritime data
    ```
 
 ### For Production
+
 1. **Ensure Docker and Docker-Compose are Installed**:
    - [Install Docker](https://docs.docker.com/get-docker/)
    - [Install Docker Compose](https://docs.docker.com/compose/install/)
@@ -75,5 +83,16 @@ The API uses standard HTTP response codes to indicate the success or failure of 
 
 ## Logging
 
-The application logs important actions and errors, facilitating debugging and monitoring. The logs are stored locally in the app.log file. 
+The application logs important actions and errors, facilitating debugging and monitoring. The logs are stored locally in the app.log file.
 
+## Documentation
+
+Developer documentation, including a detailed description of API endpoints and usage examples, can be found [here](https://cortomaltese3.github.io/MaritimeMetricsAPI/).
+
+## Before Opening a Pull Request
+
+Ensure you run the tests and comply with the linting standards before opening a pull request:
+
+- Run tests: `python -m unittest tests/test_api.py`
+- Check linting: `pylint app/ --fail-under=8`
+  Failure to meet the test coverage and linting standards will result in CI pipeline failures.
