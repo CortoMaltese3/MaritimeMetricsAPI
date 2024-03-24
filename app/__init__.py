@@ -5,12 +5,29 @@ from flasgger import Swagger
 from config import Config
 import logging
 
-from .models import MaritimeData
+from .database import db
 from . import logging_config
+from .models import MaritimeData
 
 app = Flask(__name__)
 Swagger(app)
 app.config.from_object(Config)
+
+
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+    Swagger(app)
+
+    # Initialize the database with the app
+    db.init_app(app)
+
+    # Import models and views to ensure they're registered with the app
+    from .models import VesselData
+    from . import views
+
+    return app
+
 
 # Attempt to initialize MaritimeData
 csv_path = app.config["CSV_PATH"]

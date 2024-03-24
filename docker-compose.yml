@@ -9,8 +9,27 @@ services:
       - .:/app
     env_file:
       - .env
+    depends_on:
+      - db
     networks:
       - marine-metrics-network
+
+  db:
+    image: postgres:latest
+    container_name: marine-metrics-db
+    env_file:
+      - .env    
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: maritimemetrics
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - marine-metrics-network
+
+volumes:
+  postgres_data:
 
 networks:
   marine-metrics-network:

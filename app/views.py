@@ -16,6 +16,7 @@ from flask import jsonify, Response, request
 from flasgger import swag_from
 
 from .data_analysis import DataAnalyzer
+from .models import VesselData
 from . import app
 
 maritime_data = app.config["maritime_data"]
@@ -371,6 +372,13 @@ def get_vessel_problems(vessel_code: str):
     except Exception as e:
         logging.error(f"Error retrieving problem summary for vessel {vessel_code}: {e}")
         return jsonify({"message": "An error occurred processing your request."}), 500
+
+
+@app.route("/api/vessel/<int:vessel_code>")
+def get_vessel_data(vessel_code):
+    """Dummy route to fetch vessel data from the database."""
+    vessel_data = VesselData.query.filter_by(vessel_code=vessel_code).all()
+    return jsonify(vessel_data)
 
 
 if __name__ == "__main__":

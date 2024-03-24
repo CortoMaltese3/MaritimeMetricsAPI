@@ -15,6 +15,23 @@ import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from scipy import stats
 
+from . import db
+
+
+class VesselData(db.Model):
+    """SQLAlchemy model for storing vessel data."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    vessel_code = db.Column(db.Integer, nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    power = db.Column(db.Float, nullable=False)
+    fuel_consumption = db.Column(db.Float, nullable=False)
+    actual_speed_overground = db.Column(db.Float, nullable=False)
+    proposed_speed_overground = db.Column(db.Float, nullable=False)
+    predicted_fuel_consumption = db.Column(db.Float, nullable=False)
+
 
 class MaritimeData:
     """

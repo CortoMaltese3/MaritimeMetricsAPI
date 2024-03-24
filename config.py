@@ -21,4 +21,6 @@ class Config:
     """
 
     CSV_PATH = "data/vessel_data.csv"
-    DEBUG = os.getenv("DEBUG", "False")
+    ENV = os.getenv('FLASK_ENV', 'production')
+    DEBUG = os.getenv("DEBUG", "True")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "")
