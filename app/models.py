@@ -7,6 +7,7 @@ The primary class, `MaritimeData`, encapsulates the logic for data handling, inc
 loading from CSV, data cleansing, and metrics computation.
 """
 
+from datetime import datetime
 import logging
 from typing import Any, Dict, List
 
@@ -257,7 +258,7 @@ class MaritimeData:
                 filtered_rows = self.filtered_data.loc[mask]
 
                 # Update the main data with rows where the condition is not met.
-                # Add this approach to filter out the invalid rows instead of marking them as 
+                # Add this approach to filter out the invalid rows instead of marking them as
                 # invalid
                 self.filtered_data = valid_rows
 
@@ -413,6 +414,20 @@ class MaritimeData:
         :return: List of dictionaries with data for each record within the period.
         :rtype: List[Dict[str, Any]]
         """
+        # Convert string dates to datetime objects for comparison
+        try:
+            start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+            end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+        except ValueError:
+            # Incorrect date format
+            logging.error("Date format should be YYYY-MM-DD.")
+            raise ValueError("Date format should be YYYY-MM-DD.")
+
+        # Check if start date is after end date
+        if start_date_obj > end_date_obj:
+            logging.error("Start date cannot be after end date.")
+            raise ValueError("Start date cannot be after end date.")
+
         # Check if datetime column is in the correct format
         if not is_datetime(self.filtered_data["datetime"]):
             logging.error("datetime column in incorrect format")
@@ -449,6 +464,20 @@ class MaritimeData:
         :return: List of dictionaries with raw data for each record within the period.
         :rtype: List[Dict[str, Any]]
         """
+        # Convert string dates to datetime objects for comparison
+        try:
+            start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+            end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+        except ValueError:
+            # Incorrect date format
+            logging.error("Date format should be YYYY-MM-DD.")
+            raise ValueError("Date format should be YYYY-MM-DD.")
+
+        # Check if start date is after end date
+        if start_date_obj > end_date_obj:
+            logging.error("Start date cannot be after end date.")
+            raise ValueError("Start date cannot be after end date.")
+
         # Check if datetime column is in the correct format
         if not is_datetime(self.filtered_data["datetime"]):
             logging.error("datetime column in incorrect format")

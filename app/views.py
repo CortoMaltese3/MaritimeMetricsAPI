@@ -52,6 +52,9 @@ def get_vessel_invalid_data(vessel_code: str) -> Response:
             }
     """
     try:
+        if not vessel_code:
+            logging.warning("Vessel code cannot be empty.")
+            return jsonify({"message": "Vessel code cannot be empty."}), 400
         vessel_code_int = int(vessel_code)
         invalid_data = maritime_data.get_invalid_data_for_vessel(vessel_code_int)
         if not invalid_data:
@@ -114,6 +117,9 @@ def get_vessel_speed_difference(vessel_code: str) -> Response:
             }
     """
     try:
+        if not vessel_code:
+            logging.warning("Vessel code cannot be empty.")
+            return jsonify({"message": "Vessel code cannot be empty."}), 400
         vessel_code_int = int(vessel_code)
         speed_differences = maritime_data.get_speed_differences_for_vessel(
             vessel_code_int
@@ -175,6 +181,9 @@ def vessel_compliance_comparison(vessel_code1: str, vessel_code2: str) -> Respon
             }
     """
     try:
+        if not vessel_code1 or not vessel_code2:
+            logging.warning("Vessel code cannot be empty.")
+            return jsonify({"message": "Vessel code cannot be empty."}), 400
         vessel_code1_int, vessel_code2_int = map(int, [vessel_code1, vessel_code2])
         comparison_result = maritime_data.compare_vessel_compliance(
             vessel_code1_int, vessel_code2_int
@@ -232,6 +241,9 @@ def get_vessel_metrics(vessel_code: str, start_date: str, end_date: str) -> Resp
             ]
     """
     try:
+        if not vessel_code:
+            logging.warning("Vessel code cannot be empty.")
+            return jsonify({"message": "Vessel code cannot be empty."}), 400
         vessel_code_int = int(vessel_code)
         if not all(
             map(lambda x: datetime.strptime(x, "%Y-%m-%d"), [start_date, end_date])
@@ -297,6 +309,9 @@ def get_vessel_raw_metrics(
             ]
     """
     try:
+        if not vessel_code:
+            logging.warning("Vessel code cannot be empty.")
+            return jsonify({"message": "Vessel code cannot be empty."}), 400
         vessel_code_int = int(vessel_code)
         # Date validation as performed in get_vessel_metrics
         if not all(

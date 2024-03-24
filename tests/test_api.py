@@ -1,4 +1,10 @@
+"""
+Module to test the Flask API endpoints.
+"""
+
+import json
 import unittest
+
 from app.views import app
 
 
@@ -72,6 +78,23 @@ class APITest(unittest.TestCase):
             "/api/vessel_compliance_comparison/3001/notanumber"
         )  # Invalid format
         self.assertEqual(response.status_code, 400)
+
+    def test_vessel_metrics_with_start_date_after_end_date(self):
+        """
+        Test that the API handles cases where start date is after the end date.
+        """
+        response = self.app.get("/api/vessel_metrics/3001/2024-01-01/2023-01-01")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "Start date cannot be after end date", response.get_json()["message"]
+        )
+
+    def test_get_vessel_data_with_empty_string(self):
+        """
+        Test that the API handles requests with an empty string as vessel code.
+        """
+        response = self.app.get("/api/vessel_invalid_data/")
+        self.assertEqual(response.status_code, 404)
 
 
 if __name__ == "__main__":
