@@ -26,7 +26,7 @@ class LogConfig:
 
     LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
     DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-    LOG_FILE = "app.log"
+    LOG_FILE = "logs/app.log"
     LOG_LEVEL_CONSOLE = logging.INFO
     LOG_LEVEL_FILE = logging.WARNING
 
