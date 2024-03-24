@@ -13,6 +13,7 @@ import json
 import logging
 
 from flask import jsonify, Response
+from flasgger import swag_from
 
 from .models import MaritimeData
 
@@ -26,6 +27,7 @@ except Exception as e:
 
 
 @app.route("/api/vessel_invalid_data/<vessel_code>", methods=["GET"])
+@swag_from("docs/vessel_invalid_data.yml")
 def get_vessel_invalid_data(vessel_code: str) -> Response:
     """
     Retrieves a summary of invalid data for a specific vessel based on its code.
@@ -87,6 +89,7 @@ def get_vessel_invalid_data(vessel_code: str) -> Response:
 
 
 @app.route("/api/vessel_speed_difference/<vessel_code>", methods=["GET"])
+@swag_from("docs/vessel_speed_difference.yml")
 def get_vessel_speed_difference(vessel_code: str) -> Response:
     """
     Provides the speed differences between actual and proposed speeds for a vessel.
@@ -154,6 +157,7 @@ def get_vessel_speed_difference(vessel_code: str) -> Response:
 @app.route(
     "/api/vessel_compliance_comparison/<vessel_code1>/<vessel_code2>", methods=["GET"]
 )
+@swag_from("docs/vessel_compliance_comparison.yml")
 def vessel_compliance_comparison(vessel_code1: str, vessel_code2: str) -> Response:
     """
     Compares the compliance scores between two vessels based on their speed adherence.
@@ -198,6 +202,7 @@ def vessel_compliance_comparison(vessel_code1: str, vessel_code2: str) -> Respon
 
 
 @app.route("/api/vessel_metrics/<vessel_code>/<start_date>/<end_date>", methods=["GET"])
+@swag_from("docs/vessel_metrics.yml")
 def get_vessel_metrics(vessel_code: str, start_date: str, end_date: str) -> Response:
     """
     Retrieves metrics for a specific vessel within a given time period.
@@ -260,6 +265,7 @@ def get_vessel_metrics(vessel_code: str, start_date: str, end_date: str) -> Resp
 @app.route(
     "/api/vessel_raw_metrics/<vessel_code>/<start_date>/<end_date>", methods=["GET"]
 )
+@swag_from("docs/vessel_raw_metrics.yml")
 def get_vessel_raw_metrics(
     vessel_code: str, start_date: str, end_date: str
 ) -> Response:

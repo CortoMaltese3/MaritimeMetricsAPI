@@ -1,0 +1,26 @@
+tags:
+  - Vessel Data
+parameters:
+  - name: vessel_code
+    in: path
+    type: string
+    required: true
+    description: The unique code identifying the vessel.
+responses:
+  200:
+    description: A summary of invalid data for a specific vessel.
+    examples:
+      application/json:
+        message: Found invalid data for this vessel
+        vessel_code: "3001"
+        invalid_data:
+          below_zero:
+            proposed_speed_overground: 30686
+            predicted_fuel_consumption: 1669
+            power: 1375
+  404:
+    description: No data found for this vessel.
+  400:
+    description: Invalid vessel code format.
+  500:
+    description: An error occurred processing your request.

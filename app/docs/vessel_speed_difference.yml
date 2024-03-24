@@ -1,0 +1,36 @@
+tags:
+  - Vessel Data
+parameters:
+  - name: vessel_code
+    in: path
+    type: string
+    required: true
+    description: The unique code identifying the vessel.
+responses:
+  200:
+    description: A JSON response containing the speed differences for the vessel.
+    examples:
+      application/json:
+        message: "Speed differences for the vessel"
+        vessel_code: 19310
+        speed_differences:
+          - latitude: 49.2837677001953
+            longitude: -123.177825927734
+            speed_difference: 0.747206647694111
+  404:
+    description: No data found for this vessel or no speed differences calculated.
+    examples:
+      application/json:
+        message: "No data found for this vessel or no speed differences."
+        vessel_code: 19310
+  400:
+    description: Invalid vessel code format received.
+    examples:
+      application/json:
+        message: "Invalid vessel code format."
+        vessel_code: "invalid_code"
+  500:
+    description: An error occurred processing your request.
+    examples:
+      application/json:
+        message: "An error occurred processing your request."

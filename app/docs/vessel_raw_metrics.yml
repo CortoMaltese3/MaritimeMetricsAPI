@@ -1,0 +1,47 @@
+tags:
+  - Vessel Data
+parameters:
+  - name: vessel_code
+    in: path
+    type: string
+    required: true
+    description: The unique code identifying the vessel.
+  - name: start_date
+    in: path
+    type: string
+    required: true
+    description: The start date of the period (inclusive), in YYYY-MM-DD format.
+  - name: end_date
+    in: path
+    type: string
+    required: true
+    description: The end date of the period (inclusive), in YYYY-MM-DD format.
+responses:
+  200:
+    description: A JSON response containing the raw data metrics for the specified vessel and period.
+    examples:
+      application/json:
+        - vessel_code: 3001
+          datetime: "2023-06-01 00:00:00"
+          latitude: 10.2894458771
+          longitude: -14.7888755798
+          power: 0.0
+          fuel_consumption: 0.0
+          actual_speed_overground: 0.039996
+          proposed_speed_overground: -0.1899042625
+          predicted_fuel_consumption: 0.0
+  404:
+    description: No raw data found for this vessel within the specified period.
+    examples:
+      application/json:
+        message: "No raw data found for this vessel within the specified period."
+  400:
+    description: Invalid input received, such as incorrect date format or vessel code.
+    examples:
+      application/json:
+        message: "Invalid date format. Use YYYY-MM-DD."
+  500:
+    description: An unexpected error occurred processing the request.
+    examples:
+      application/json:
+        message: "An error occurred processing your request."
