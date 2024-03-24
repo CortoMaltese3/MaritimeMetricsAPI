@@ -88,6 +88,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">flasgger</span> <span class="kn">import</span> <span class="n">swag_from</span>
 
 <span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">MaritimeData</span>
 
@@ -103,6 +104,7 @@
 <div class="viewcode-block" id="get_vessel_invalid_data">
 <a class="viewcode-back" href="../../api.html#app.views.get_vessel_invalid_data">[docs]</a>
 <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/api/vessel_invalid_data/&lt;vessel_code&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+<span class="nd">@swag_from</span><span class="p">(</span><span class="s2">&quot;docs/vessel_invalid_data.yml&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_vessel_invalid_data</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieves a summary of invalid data for a specific vessel based on its code.</span>
@@ -167,6 +169,7 @@
 <div class="viewcode-block" id="get_vessel_speed_difference">
 <a class="viewcode-back" href="../../api.html#app.views.get_vessel_speed_difference">[docs]</a>
 <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/api/vessel_speed_difference/&lt;vessel_code&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+<span class="nd">@swag_from</span><span class="p">(</span><span class="s2">&quot;docs/vessel_speed_difference.yml&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_vessel_speed_difference</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides the speed differences between actual and proposed speeds for a vessel.</span>
@@ -237,6 +240,7 @@
 <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
     <span class="s2">&quot;/api/vessel_compliance_comparison/&lt;vessel_code1&gt;/&lt;vessel_code2&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]</span>
 <span class="p">)</span>
+<span class="nd">@swag_from</span><span class="p">(</span><span class="s2">&quot;docs/vessel_compliance_comparison.yml&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">vessel_compliance_comparison</span><span class="p">(</span><span class="n">vessel_code1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">vessel_code2</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compares the compliance scores between two vessels based on their speed adherence.</span>
@@ -284,6 +288,7 @@
 <div class="viewcode-block" id="get_vessel_metrics">
 <a class="viewcode-back" href="../../api.html#app.views.get_vessel_metrics">[docs]</a>
 <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/api/vessel_metrics/&lt;vessel_code&gt;/&lt;start_date&gt;/&lt;end_date&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+<span class="nd">@swag_from</span><span class="p">(</span><span class="s2">&quot;docs/vessel_metrics.yml&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_vessel_metrics</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieves metrics for a specific vessel within a given time period.</span>
@@ -349,6 +354,7 @@
 <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
     <span class="s2">&quot;/api/vessel_raw_metrics/&lt;vessel_code&gt;/&lt;start_date&gt;/&lt;end_date&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]</span>
 <span class="p">)</span>
+<span class="nd">@swag_from</span><span class="p">(</span><span class="s2">&quot;docs/vessel_raw_metrics.yml&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_vessel_raw_metrics</span><span class="p">(</span>
     <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
