@@ -47,6 +47,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Models Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html#module-app.views">Views Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup and Running the Application</a></li>
 </ul>
 
         </div>
@@ -75,82 +76,6 @@
              
   <section id="welcome-to-the-marinemetricsapi-s-documentation">
 <h1>Welcome to the MarineMetricsAPI’s documentation!<a class="headerlink" href="#welcome-to-the-marinemetricsapi-s-documentation" title="Link to this heading"></a></h1>
-<section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
-<p>The Marine Metrics API is a Python-based application for analyzing maritime data, including vessel compliance, speed differences, and metrics over specific time periods. It provides a set of functionalities to filter and analyze maritime data to improve decision-making processes in maritime operations.</p>
-</section>
-<section id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
-<p>The application requires reading data from a CSV file. The path to this CSV file is configurable via the <cite>CSV_PATH</cite> parameter in the <cite>config.py</cite> file. The default dataset is the <cite>data/vessel_data.csv</cite>.</p>
-</section>
-<section id="setup-and-running-the-application">
-<h2>Setup and Running the Application<a class="headerlink" href="#setup-and-running-the-application" title="Link to this heading"></a></h2>
-</section>
-</section>
-<section id="id1">
-<h1>Setup and Running the Application<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
-<section id="for-developers">
-<h2>For Developers<a class="headerlink" href="#for-developers" title="Link to this heading"></a></h2>
-<ol class="arabic">
-<li><p><strong>Clone the Repository</strong>:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/CortoMaltese3/MaritimeMetricsAPI.git
-<span class="nb">cd</span><span class="w"> </span>MaritimeMetricsAPI
-git<span class="w"> </span>checkout<span class="w"> </span>main
-</pre></div>
-</div>
-</li>
-<li><p><strong>Set Up a Virtual Environment</strong> (optional but recommended):</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using venv</span>
-python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
-<span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w">  </span><span class="c1"># On Windows, use `venv\Scripts\activate`</span>
-
-<span class="c1"># Or using Conda</span>
-conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>maritime<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.8
-conda<span class="w"> </span>activate<span class="w"> </span>maritime
-</pre></div>
-</div>
-</li>
-<li><p><strong>Install Dependencies</strong>:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
-</pre></div>
-</div>
-</li>
-<li><p><strong>Create a `.env` File</strong> based on the <cite>.env.template</cite> in the root directory.</p></li>
-<li><p><strong>Start the Flask Application Locally</strong>:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>flask<span class="w"> </span>run
-</pre></div>
-</div>
-</li>
-</ol>
-</section>
-<section id="for-production">
-<h2>For Production<a class="headerlink" href="#for-production" title="Link to this heading"></a></h2>
-<ol class="arabic">
-<li><p><strong>Ensure Docker and Docker-Compose are Installed</strong>:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://docs.docker.com/get-docker/">Install Docker</a></p></li>
-<li><p><a class="reference external" href="https://docs.docker.com/compose/install/">Install Docker Compose</a></p></li>
-</ul>
-</li>
-<li><p>Follow steps 1 to 4 from the Developers section.</p></li>
-<li><p><strong>Use Docker Compose to Run the Application</strong>:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker-compose<span class="w"> </span>up<span class="w"> </span>--build
-</pre></div>
-</div>
-</li>
-</ol>
-</section>
-<section id="logging">
-<h2>Logging<a class="headerlink" href="#logging" title="Link to this heading"></a></h2>
-<p>The application logs important actions and errors, facilitating debugging and monitoring. The logs are stored locally in the <cite>app.log</cite> file.</p>
-</section>
-<section id="documentation">
-<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading"></a></h2>
-<p>Developer documentation, including a detailed description of API endpoints and usage examples, can be found <a class="reference external" href="https://cortomaltese3.github.io/MaritimeMetricsAPI/">here</a>.</p>
-</section>
-<section id="before-opening-a-pull-request">
-<h2>Before Opening a Pull Request<a class="headerlink" href="#before-opening-a-pull-request" title="Link to this heading"></a></h2>
-<p>Ensure you run the tests and comply with the linting standards before opening a pull request.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -166,9 +91,13 @@ conda<span class="w"> </span>activate<span class="w"> </span>maritime
 <li class="toctree-l2"><a class="reference internal" href="api.html#app.views.vessel_compliance_comparison"><code class="docutils literal notranslate"><span class="pre">vessel_compliance_comparison()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup and Running the Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="setup.html#for-developers">For Developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup.html#for-production">For Production</a></li>
+</ul>
+</li>
 </ul>
 </div>
-</section>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
@@ -177,6 +106,52 @@ conda<span class="w"> </span>activate<span class="w"> </span>maritime
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The Marine Metrics API is a Python-based application for analyzing maritime data, including vessel compliance, speed differences, and metrics over specific time periods. It provides a set of functionalities to filter and analyze maritime data to improve decision-making processes in maritime operations.</p>
+</section>
+<section id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
+<p>The application requires reading data from a CSV file. The path to this CSV file is configurable via the <cite>CSV_PATH</cite> parameter in the <cite>config.py</cite> file. The default dataset is the <cite>data/vessel_data.csv</cite>.</p>
+</section>
+<section id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Link to this heading"></a></h2>
+<p>The application logs important actions and errors, facilitating debugging and monitoring. The logs are stored locally in the <cite>app.log</cite> file.</p>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading"></a></h2>
+<p>Developer documentation, including a detailed description of API endpoints and usage examples, can be found <a class="reference external" href="https://cortomaltese3.github.io/MaritimeMetricsAPI/">here</a>.</p>
+</section>
+<section id="before-opening-a-pull-request">
+<h2>Before Opening a Pull Request<a class="headerlink" href="#before-opening-a-pull-request" title="Link to this heading"></a></h2>
+<p>Before opening a pull request, please ensure the following steps are completed to maintain code and documentation quality:</p>
+<ol class="arabic">
+<li><p><strong>Run the Tests</strong>:
+Ensure that all tests pass successfully to maintain application integrity.
+.. code-block:: sh</p>
+<blockquote>
+<div><p>python -m unittest tests/test_api.py</p>
+</div></blockquote>
+</li>
+<li><p><strong>Comply with Linting Standards</strong>:
+Your code should comply with established linting standards. The CI pipeline will fail if these standards are not met.
+.. code-block:: sh</p>
+<blockquote>
+<div><p>pylint app/ –fail-under=8</p>
+</div></blockquote>
+</li>
+<li><p><strong>Update the Documentation</strong>:
+If your changes affect how users interact with the application or add new features, please update the documentation accordingly. Once updates are made, build the documentation locally to ensure it compiles without errors.
+.. code-block:: sh</p>
+<blockquote>
+<div><p>sphinx-build -b html doc/ doc/_build/</p>
+</div></blockquote>
+<p>Review the generated HTML files in <cite>doc/_build/</cite> to verify your changes. Include the updated documentation files in your pull request.</p>
+</li>
+<li><p><strong>Upload Documentation Changes</strong>:
+Along with your code changes, commit any updated documentation files to ensure the documentation remains current and useful for all users.</p></li>
+</ol>
+</section>
 </section>
 
 
