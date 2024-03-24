@@ -1,5 +1,5 @@
-Setup and Running the Application
-=================================
+Setup and Running
+=================
 
 For Developers
 --------------

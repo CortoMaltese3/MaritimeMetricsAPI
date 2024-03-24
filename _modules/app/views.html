@@ -45,7 +45,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">Models Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html#module-app.views">Views Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup and Running the Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup and Running</a></li>
 </ul>
 
         </div>
@@ -87,13 +87,11 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">Response</span>
 
-<span class="kn">from</span> <span class="nn">config</span> <span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">MaritimeData</span>
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">Config</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">app</span>
 
 <span class="n">csv_path</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;CSV_PATH&quot;</span><span class="p">]</span>
 <span class="k">try</span><span class="p">:</span>
