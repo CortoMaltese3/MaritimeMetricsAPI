@@ -96,3 +96,8 @@ Ensure you run the tests and comply with the linting standards before opening a 
 - Run tests: `python -m unittest tests/test_api.py`
 - Check linting: `pylint app/ --fail-under=8`
   Failure to meet the test coverage and linting standards will result in CI pipeline failures.
+
+
+## API Testing with Swagger UI
+MarineMetricsAPI includes a Swagger UI interface that allows developers and users to interactively test the API endpoints without writing any code. The Swagger UI provides a web-based interface where you can see all available API endpoints, their required parameters, and even execute API calls directly from your browser. More information can be found in the [documentation](https://cortomaltese3.github.io/MaritimeMetricsAPI/setup.html).
+
