@@ -40,14 +40,20 @@ class DataAnalyzer:
     def get_problematic_data_summary(self, column_name, problem_type="missing_values"):
         """Returns a summary of problematic data groups for a specific column."""
         sorted_groups = self.detect_consecutive_problems(column_name, problem_type)
+
+        # Convert sorted_groups Series to a dictionary with Python integers
+        # to avoid JSON serialization issues
+        groups_dict = sorted_groups.to_dict()
+        groups_dict_converted = {key: int(value) for key, value in groups_dict.items()}
+
         summary = {
             "problem_type": problem_type,
             "column_name": column_name,
             "number_of_groups": len(sorted_groups),
             "largest_group_size": (
-                sorted_groups.iloc[0] if not sorted_groups.empty else 0
+                int(sorted_groups.iloc[0]) if not sorted_groups.empty else 0
             ),
-            "groups": sorted_groups.to_dict(),
+            "groups": groups_dict_converted,
         }
         return summary
 
