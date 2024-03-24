@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to the MarineMetricsAPI’s documentation! &mdash; MarineMetricsAPI v0.1.0 documentation</title>
+  <title>Setup and Running the Application &mdash; MarineMetricsAPI v0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -20,8 +20,7 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Models Module" href="api.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -32,7 +31,7 @@
 
           
           
-          <a href="#" class="icon icon-home">
+          <a href="index.html" class="icon icon-home">
             MarineMetricsAPI
           </a>
 <div role="search">
@@ -55,17 +54,17 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">MarineMetricsAPI</a>
+          <a href="index.html">MarineMetricsAPI</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to the MarineMetricsAPI’s documentation!</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Setup and Running the Application</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/setup.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -73,22 +72,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to-the-marinemetricsapi-s-documentation">
-<h1>Welcome to the MarineMetricsAPI’s documentation!<a class="headerlink" href="#welcome-to-the-marinemetricsapi-s-documentation" title="Link to this heading"></a></h1>
-<section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
-<p>The Marine Metrics API is a Python-based application for analyzing maritime data, including vessel compliance, speed differences, and metrics over specific time periods. It provides a set of functionalities to filter and analyze maritime data to improve decision-making processes in maritime operations.</p>
-</section>
-<section id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
-<p>The application requires reading data from a CSV file. The path to this CSV file is configurable via the <cite>CSV_PATH</cite> parameter in the <cite>config.py</cite> file. The default dataset is the <cite>data/vessel_data.csv</cite>.</p>
-</section>
-<section id="setup-and-running-the-application">
-<h2>Setup and Running the Application<a class="headerlink" href="#setup-and-running-the-application" title="Link to this heading"></a></h2>
-</section>
-</section>
-<section id="id1">
-<h1>Setup and Running the Application<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+  <section id="setup-and-running-the-application">
+<h1>Setup and Running the Application<a class="headerlink" href="#setup-and-running-the-application" title="Link to this heading"></a></h1>
 <section id="for-developers">
 <h2>For Developers<a class="headerlink" href="#for-developers" title="Link to this heading"></a></h2>
 <ol class="arabic">
@@ -140,51 +125,12 @@ conda<span class="w"> </span>activate<span class="w"> </span>maritime
 </li>
 </ol>
 </section>
-<section id="logging">
-<h2>Logging<a class="headerlink" href="#logging" title="Link to this heading"></a></h2>
-<p>The application logs important actions and errors, facilitating debugging and monitoring. The logs are stored locally in the <cite>app.log</cite> file.</p>
-</section>
-<section id="documentation">
-<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading"></a></h2>
-<p>Developer documentation, including a detailed description of API endpoints and usage examples, can be found <a class="reference external" href="https://cortomaltese3.github.io/MaritimeMetricsAPI/">here</a>.</p>
-</section>
-<section id="before-opening-a-pull-request">
-<h2>Before Opening a Pull Request<a class="headerlink" href="#before-opening-a-pull-request" title="Link to this heading"></a></h2>
-<p>Ensure you run the tests and comply with the linting standards before opening a pull request.</p>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Models Module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#app.models.MaritimeData"><code class="docutils literal notranslate"><span class="pre">MaritimeData</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api.html#module-app.views">Views Module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#app.views.get_vessel_invalid_data"><code class="docutils literal notranslate"><span class="pre">get_vessel_invalid_data()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#app.views.get_vessel_metrics"><code class="docutils literal notranslate"><span class="pre">get_vessel_metrics()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#app.views.get_vessel_raw_metrics"><code class="docutils literal notranslate"><span class="pre">get_vessel_raw_metrics()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#app.views.get_vessel_speed_difference"><code class="docutils literal notranslate"><span class="pre">get_vessel_speed_difference()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#app.views.vessel_compliance_comparison"><code class="docutils literal notranslate"><span class="pre">vessel_compliance_comparison()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</div>
-</section>
-</section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
 </section>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="api.html" class="btn btn-neutral float-right" title="Models Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
