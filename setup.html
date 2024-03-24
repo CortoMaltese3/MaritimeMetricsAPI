@@ -50,6 +50,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Setup and Running</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#for-developers">For Developers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#for-production">For Production</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#api-testing-with-swagger-ui">API Testing with Swagger UI</a></li>
 </ul>
 </li>
 </ul>
@@ -129,6 +130,26 @@ conda<span class="w"> </span>activate<span class="w"> </span>maritime
 </pre></div>
 </div>
 </li>
+</ol>
+</section>
+<section id="api-testing-with-swagger-ui">
+<h2>API Testing with Swagger UI<a class="headerlink" href="#api-testing-with-swagger-ui" title="Link to this heading"></a></h2>
+<p>MarineMetricsAPI includes a Swagger UI interface that allows developers and users to interactively test the API endpoints without writing any code. The Swagger UI provides a web-based interface where you can see all available API endpoints, their required parameters, and even execute API calls directly from your browser.</p>
+<p>To access the Swagger UI:</p>
+<ol class="arabic">
+<li><p>Ensure the Flask application is running. If it’s not, start the Flask server by running:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>flask<span class="w"> </span>run
+</pre></div>
+</div>
+<p>Or, if you’re using Docker:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>docker-compose<span class="w"> </span>up<span class="w"> </span>--build
+</pre></div>
+</div>
+</li>
+<li><p>Open your web browser and navigate to <cite>/apidocs</cite> on your Flask server’s address. If you’re running the server locally, the Swagger UI will typically be available at:</p>
+<p><cite>http://localhost:5000/apidocs</cite></p>
+</li>
+<li><p>Explore the API endpoints listed in the Swagger UI. You can expand each endpoint to see detailed information about the request parameters, expected responses, and even try out the endpoint directly by clicking on the “Try it out” button, entering the required parameters, and observing the API response.</p></li>
 </ol>
 </section>
 </section>

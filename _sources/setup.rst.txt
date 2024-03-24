@@ -53,3 +53,29 @@ For Production
    .. code-block:: sh
 
       docker-compose up --build
+
+
+API Testing with Swagger UI
+---------------------------
+
+MarineMetricsAPI includes a Swagger UI interface that allows developers and users to interactively test the API endpoints without writing any code. The Swagger UI provides a web-based interface where you can see all available API endpoints, their required parameters, and even execute API calls directly from your browser.
+
+To access the Swagger UI:
+
+1. Ensure the Flask application is running. If it's not, start the Flask server by running:
+
+   .. code-block:: sh
+
+      flask run
+
+   Or, if you're using Docker:
+
+   .. code-block:: sh
+
+      docker-compose up --build
+
+2. Open your web browser and navigate to `/apidocs` on your Flask server's address. If you're running the server locally, the Swagger UI will typically be available at:
+
+   `http://localhost:5000/apidocs`
+
+3. Explore the API endpoints listed in the Swagger UI. You can expand each endpoint to see detailed information about the request parameters, expected responses, and even try out the endpoint directly by clicking on the "Try it out" button, entering the required parameters, and observing the API response.
