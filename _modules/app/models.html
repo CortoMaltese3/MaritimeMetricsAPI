@@ -380,7 +380,7 @@
 <div class="viewcode-block" id="MaritimeData.get_speed_differences_for_vessel">
 <a class="viewcode-back" href="../../api.html#app.models.MaritimeData.get_speed_differences_for_vessel">[docs]</a>
     <span class="k">def</span> <span class="nf">get_speed_differences_for_vessel</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the speed differences between actual and proposed speeds for a vessel.</span>
@@ -405,6 +405,8 @@
         <span class="p">)</span>
 
         <span class="n">speed_differences</span> <span class="o">=</span> <span class="n">vessel_data</span><span class="p">[[</span><span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;speed_difference&quot;</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">limit</span><span class="p">:</span>
+            <span class="n">speed_differences</span> <span class="o">=</span> <span class="n">speed_differences</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">speed_differences</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span></div>
 
 
@@ -491,7 +493,7 @@
 <div class="viewcode-block" id="MaritimeData.get_metrics_for_vessel_period">
 <a class="viewcode-back" href="../../api.html#app.models.MaritimeData.get_metrics_for_vessel_period">[docs]</a>
     <span class="k">def</span> <span class="nf">get_metrics_for_vessel_period</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves filtered data metrics for a specific vessel over a given period.</span>
@@ -538,13 +540,15 @@
             <span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;actual_speed_overground&quot;</span><span class="p">]</span>
             <span class="o">-</span> <span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;proposed_speed_overground&quot;</span><span class="p">]</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="n">limit</span><span class="p">:</span>
+            <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">filtered_data</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">filtered_data</span></div>
 
 
 <div class="viewcode-block" id="MaritimeData.get_raw_metrics_for_vessel_period">
 <a class="viewcode-back" href="../../api.html#app.models.MaritimeData.get_raw_metrics_for_vessel_period">[docs]</a>
     <span class="k">def</span> <span class="nf">get_raw_metrics_for_vessel_period</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">vessel_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves raw data metrics for a specific vessel over a given period.</span>
@@ -582,7 +586,8 @@
             <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">start_date</span><span class="p">)</span>
             <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">end_date</span><span class="p">)</span>
         <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
+        <span class="k">if</span> <span class="n">limit</span><span class="p">:</span>
+            <span class="n">raw_data_filtered</span> <span class="o">=</span> <span class="n">raw_data_filtered</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">raw_data_filtered</span></div>
 </div>
 

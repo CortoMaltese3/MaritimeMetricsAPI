@@ -195,9 +195,12 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">vessel_code</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Vessel code cannot be empty.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Vessel code cannot be empty.&quot;</span><span class="p">}),</span> <span class="mi">400</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;limit&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span>
+        <span class="p">)</span>  <span class="c1"># Get &#39;limit&#39; parameter, defaults to None if not provided</span>
         <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
         <span class="n">speed_differences</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_speed_differences_for_vessel</span><span class="p">(</span>
-            <span class="n">vessel_code_int</span>
+            <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">speed_differences</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
@@ -326,12 +329,15 @@
             <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Vessel code cannot be empty.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Vessel code cannot be empty.&quot;</span><span class="p">}),</span> <span class="mi">400</span>
         <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;limit&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span>
+        <span class="p">)</span>  <span class="c1"># Get &#39;limit&#39; parameter, defaults to None if not provided</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
             <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">[</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">])</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid date format. Use YYYY-MM-DD.&quot;</span><span class="p">)</span>
         <span class="n">metrics_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_metrics_for_vessel_period</span><span class="p">(</span>
-            <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span>
+            <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">limit</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">metrics_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
@@ -397,13 +403,16 @@
             <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Vessel code cannot be empty.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Vessel code cannot be empty.&quot;</span><span class="p">}),</span> <span class="mi">400</span>
         <span class="n">vessel_code_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vessel_code</span><span class="p">)</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;limit&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span>
+        <span class="p">)</span>  <span class="c1"># Get &#39;limit&#39; parameter, defaults to None if not provided</span>
         <span class="c1"># Date validation as performed in get_vessel_metrics</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
             <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">[</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">])</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid date format. Use YYYY-MM-DD.&quot;</span><span class="p">)</span>
         <span class="n">raw_data</span> <span class="o">=</span> <span class="n">maritime_data</span><span class="o">.</span><span class="n">get_raw_metrics_for_vessel_period</span><span class="p">(</span>
-            <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span>
+            <span class="n">vessel_code_int</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">limit</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
