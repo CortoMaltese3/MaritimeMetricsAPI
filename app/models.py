@@ -298,7 +298,7 @@ class MaritimeData:
         return sorted_summary
 
     def get_speed_differences_for_vessel(
-        self, vessel_code: int
+        self, vessel_code: int, limit=None
     ) -> List[Dict[str, Any]]:
         """
         Calculates the speed differences between actual and proposed speeds for a vessel.
@@ -323,6 +323,8 @@ class MaritimeData:
         )
 
         speed_differences = vessel_data[["latitude", "longitude", "speed_difference"]]
+        if limit:
+            speed_differences = speed_differences[:limit]
         return speed_differences.to_dict(orient="records")
 
     def calculate_compliance_score(self, vessel_code: int) -> float:
@@ -400,7 +402,7 @@ class MaritimeData:
         return f"Both vessels have the same compliance score of {score1}%."
 
     def get_metrics_for_vessel_period(
-        self, vessel_code: int, start_date: str, end_date: str
+        self, vessel_code: int, start_date: str, end_date: str, limit=None
     ) -> List[Dict[str, Any]]:
         """
         Retrieves filtered data metrics for a specific vessel over a given period.
@@ -447,10 +449,12 @@ class MaritimeData:
             filtered_data["actual_speed_overground"]
             - filtered_data["proposed_speed_overground"]
         )
+        if limit:
+            filtered_data = filtered_data[:limit]
         return filtered_data
 
     def get_raw_metrics_for_vessel_period(
-        self, vessel_code: int, start_date: str, end_date: str
+        self, vessel_code: int, start_date: str, end_date: str, limit=None
     ) -> List[Dict[str, Any]]:
         """
         Retrieves raw data metrics for a specific vessel over a given period.
@@ -488,5 +492,6 @@ class MaritimeData:
             & (self.raw_data["datetime"] >= start_date)
             & (self.raw_data["datetime"] <= end_date)
         ].copy()
-
+        if limit:
+            raw_data_filtered = raw_data_filtered[:limit]
         return raw_data_filtered

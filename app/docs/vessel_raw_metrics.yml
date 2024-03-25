@@ -16,6 +16,11 @@ parameters:
     type: string
     required: true
     description: The end date of the period (inclusive), in YYYY-MM-DD format.
+  - name: limit
+    in: query
+    type: integer
+    required: false
+    description: The maximum number of speed differences to return.       
 responses:
   200:
     description: A JSON response containing the raw data metrics for the specified vessel and period.

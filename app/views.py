@@ -115,9 +115,12 @@ def get_vessel_speed_difference(vessel_code: str) -> Response:
         if not vessel_code:
             logging.warning("Vessel code cannot be empty.")
             return jsonify({"message": "Vessel code cannot be empty."}), 400
+        limit = request.args.get(
+            "limit", type=int
+        )  # Get 'limit' parameter, defaults to None if not provided
         vessel_code_int = int(vessel_code)
         speed_differences = maritime_data.get_speed_differences_for_vessel(
-            vessel_code_int
+            vessel_code_int, limit=limit
         )
         if not speed_differences:
             return (
@@ -240,12 +243,15 @@ def get_vessel_metrics(vessel_code: str, start_date: str, end_date: str) -> Resp
             logging.warning("Vessel code cannot be empty.")
             return jsonify({"message": "Vessel code cannot be empty."}), 400
         vessel_code_int = int(vessel_code)
+        limit = request.args.get(
+            "limit", type=int
+        )  # Get 'limit' parameter, defaults to None if not provided
         if not all(
             map(lambda x: datetime.strptime(x, "%Y-%m-%d"), [start_date, end_date])
         ):
             raise ValueError("Invalid date format. Use YYYY-MM-DD.")
         metrics_data = maritime_data.get_metrics_for_vessel_period(
-            vessel_code_int, start_date, end_date
+            vessel_code_int, start_date, end_date, limit
         )
         if metrics_data.empty:
             return (
@@ -308,13 +314,16 @@ def get_vessel_raw_metrics(
             logging.warning("Vessel code cannot be empty.")
             return jsonify({"message": "Vessel code cannot be empty."}), 400
         vessel_code_int = int(vessel_code)
+        limit = request.args.get(
+            "limit", type=int
+        )  # Get 'limit' parameter, defaults to None if not provided
         # Date validation as performed in get_vessel_metrics
         if not all(
             map(lambda x: datetime.strptime(x, "%Y-%m-%d"), [start_date, end_date])
         ):
             raise ValueError("Invalid date format. Use YYYY-MM-DD.")
         raw_data = maritime_data.get_raw_metrics_for_vessel_period(
-            vessel_code_int, start_date, end_date
+            vessel_code_int, start_date, end_date, limit
         )
         if raw_data.empty:
             return (

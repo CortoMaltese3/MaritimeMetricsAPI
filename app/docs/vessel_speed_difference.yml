@@ -6,6 +6,11 @@ parameters:
     type: string
     required: true
     description: The unique code identifying the vessel.
+  - name: limit
+    in: query
+    type: integer
+    required: false
+    description: The maximum number of speed differences to return.    
 responses:
   200:
     description: A JSON response containing the speed differences for the vessel.
